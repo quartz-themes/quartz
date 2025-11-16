@@ -1,4 +1,4 @@
-import { FilePath, QUARTZ } from "../../util/path"
+import { FilePath } from "../../util/path"
 import { QuartzEmitterPlugin } from "../types"
 import fs from "fs"
 import { glob } from "../../util/glob"
@@ -8,7 +8,7 @@ export const Static: QuartzEmitterPlugin = () => ({
   name: "Static",
   async *emit(ctx) {
     const { argv, cfg, utils } = ctx
-    const staticPath = utils!.path.join(QUARTZ, "static")
+    const staticPath = utils!.path.join(utils!.path.QUARTZ, "static")
     const fps = await glob("**", staticPath, cfg.configuration.ignorePatterns)
     const outputStaticPath = utils!.path.join(argv.output, "static")
     await fs.promises.mkdir(outputStaticPath, { recursive: true })

@@ -1,6 +1,6 @@
 import { QuartzEmitterPlugin } from "../types"
 import { i18n } from "../../i18n"
-import { FullSlug, QUARTZ } from "../../util/path"
+import { FullSlug } from "../../util/path"
 import { ImageOptions, SocialImageOptions, defaultImage, getSatoriFonts } from "../../util/og"
 import sharp from "sharp"
 import satori, { SatoriOptions } from "satori"
@@ -31,7 +31,7 @@ async function generateSocialImage(
   utils: PluginUtilities,
 ): Promise<Readable> {
   const { width, height } = userOpts
-  const iconPath = utils.path.join(QUARTZ, "static", "icon.png")
+  const iconPath = utils.path.join(utils.path.QUARTZ, "static", "icon.png")
   let iconBase64: string | undefined = undefined
   try {
     const iconData = await fs.readFile(iconPath)

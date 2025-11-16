@@ -110,11 +110,24 @@ function createMockUtilities(): PluginUtilities {
       transform: (_from: FullSlug, to: string, _opts: TransformOptions) => to as RelativeURL,
       toRoot: (_slug: FullSlug) => "/" as RelativeURL,
       split: (slug: string) => {
-        const parts = slug.split("#", 2)
-        return [parts[0], parts[1] || ""]
+        // Mock implementation of splitAnchor with special PDF handling
+        let [fp, anchor] = slug.split("#", 2)
+        if (fp.endsWith(".pdf")) {
+          return [fp, anchor === undefined ? "" : `#${anchor}`]
+        }
+        // Simplified anchor sluggification (production uses github-slugger)
+        anchor = anchor === undefined ? "" : "#" + anchor.toLowerCase().replace(/\s+/g, "-")
+        return [fp, anchor]
       },
       join: (...segments: string[]) => segments.join("/"),
-      getAllSegmentPrefixes: (tags: string) => tags.split("/"),
+      getAllSegmentPrefixes: (tags: string) => {
+        const segments = tags.split("/")
+        const results: string[] = []
+        for (let i = 0; i < segments.length; i++) {
+          results.push(segments.slice(0, i + 1).join("/"))
+        }
+        return results
+      },
       getFileExtension: (s: string) => s.match(/\.[A-Za-z0-9]+$/)?.[0],
       isAbsoluteURL: (s: string) => {
         try {
@@ -124,12 +137,38 @@ function createMockUtilities(): PluginUtilities {
           return false
         }
       },
-      isRelativeURL: (s: string) => /^\.{1,2}/.test(s),
+      isRelativeURL: (s: string) => {
+        // 1. Starts with '.' or '..'
+        if (!/^\.{1,2}/.test(s)) return false
+        // 2. Does not end with 'index'
+        if (s.endsWith("index")) return false
+        // 3. File extension is not .md or .html
+        const ext = s.match(/\.[A-Za-z0-9]+$/)?.[0]?.toLowerCase()
+        if (ext === ".md" || ext === ".html") return false
+        return true
+      },
       resolveRelative: (_current: FullSlug, target: FullSlug | SimpleSlug) =>
         target as unknown as RelativeURL,
-      slugTag: (tag: string) => tag.toLowerCase().replace(/\s+/g, "-"),
-      stripSlashes: (s: string, onlyStripPrefix?: boolean) =>
-        onlyStripPrefix ? s.replace(/^\/+/, "") : s.replace(/^\/+|\/+$/g, ""),
+      slugTag: (tag: string) => {
+        // Mock sluggify function similar to production
+        const sluggify = (segment: string) =>
+          segment
+            .toLowerCase()
+            .replace(/[&%?#]/g, "") // remove special chars
+            .replace(/\s+/g, "-") // replace spaces with dashes
+            .replace(/-+/g, "-") // collapse multiple dashes
+            .replace(/^-+|-+$/g, "") // trim leading/trailing dashes
+        return tag.split("/").map(sluggify).join("/")
+      },
+      stripSlashes: (s: string, onlyStripPrefix?: boolean) => {
+        if (s.startsWith("/")) {
+          s = s.substring(1)
+        }
+        if (!onlyStripPrefix && s.endsWith("/")) {
+          s = s.slice(0, -1)
+        }
+        return s
+      },
       QUARTZ: "quartz",
     },
     resources: {
@@ -156,7 +195,7 @@ function createMockUtilities(): PluginUtilities {
           .replace(/&lt;/g, "<")
           .replace(/&gt;/g, ">")
           .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'"),
+          .replace(/&#039;/g, "'"),
     },
   }
 }
