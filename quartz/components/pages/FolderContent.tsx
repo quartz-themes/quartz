@@ -30,7 +30,7 @@ export default ((opts?: Partial<FolderContentOptions>) => {
   const FolderContent: QuartzComponent = (props: QuartzComponentProps) => {
     const { tree, fileData, allFiles, cfg } = props
 
-    const trie = (props.ctx.trie ??= trieFromAllFiles(allFiles))
+    const trie = props.ctx.trie ?? trieFromAllFiles(allFiles)
     const folder = trie.findNode(fileData.slug!.split("/"))
     if (!folder) {
       return null
@@ -38,7 +38,7 @@ export default ((opts?: Partial<FolderContentOptions>) => {
 
     const allPagesInFolder: QuartzPluginData[] =
       folder.children
-        .map((node) => {
+        .map((node: any) => {
           // regular file, proceed
           if (node.data) {
             return node.data
@@ -87,7 +87,7 @@ export default ((opts?: Partial<FolderContentOptions>) => {
             }
           }
         })
-        .filter((page) => page !== undefined) ?? []
+        .filter((page: any) => page !== undefined) ?? []
     const cssClasses: string[] = fileData.frontmatter?.cssclasses ?? []
     const classes = cssClasses.join(" ")
     const listProps = {

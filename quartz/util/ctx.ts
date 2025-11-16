@@ -22,6 +22,20 @@ export type BuildTimeTrieData = QuartzPluginData & {
 }
 
 export interface BuildCtx {
+  readonly buildId: string
+  readonly argv: Readonly<Argv>
+  readonly cfg: QuartzConfig
+  readonly allSlugs: ReadonlyArray<FullSlug>
+  readonly allFiles: ReadonlyArray<FilePath>
+  readonly trie?: FileTrieNode<BuildTimeTrieData>
+  readonly incremental: boolean
+}
+
+/**
+ * Mutable version of BuildCtx for build orchestration.
+ * Plugins should use BuildCtx (readonly) instead.
+ */
+export interface MutableBuildCtx {
   buildId: string
   argv: Argv
   cfg: QuartzConfig

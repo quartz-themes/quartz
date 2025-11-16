@@ -223,7 +223,7 @@ export function getAllSegmentPrefixes(tags: string): string[] {
 
 export interface TransformOptions {
   strategy: "absolute" | "relative" | "shortest"
-  allSlugs: FullSlug[]
+  allSlugs: ReadonlyArray<FullSlug>
 }
 
 export function transformLink(src: FullSlug, target: string, opts: TransformOptions): RelativeURL {

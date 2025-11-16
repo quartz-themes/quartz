@@ -12,7 +12,7 @@ import cfg from "../quartz.config"
 import { FilePath, joinSegments, slugifyFilePath } from "./util/path"
 import chokidar from "chokidar"
 import { ProcessedContent } from "./plugins/vfile"
-import { Argv, BuildCtx } from "./util/ctx"
+import { Argv, MutableBuildCtx } from "./util/ctx"
 import { glob, toPosixPath } from "./util/glob"
 import { trace } from "./util/trace"
 import { options } from "./util/sourcemap"
@@ -34,7 +34,7 @@ type ContentMap = Map<
 >
 
 type BuildData = {
-  ctx: BuildCtx
+  ctx: MutableBuildCtx
   ignored: GlobbyFilterFunction
   mut: Mutex
   contentMap: ContentMap
@@ -43,7 +43,7 @@ type BuildData = {
 }
 
 async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
-  const ctx: BuildCtx = {
+  const ctx: MutableBuildCtx = {
     buildId: randomIdNonSecure(),
     argv,
     cfg,
@@ -98,7 +98,7 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
 
 // setup watcher for rebuilds
 async function startWatching(
-  ctx: BuildCtx,
+  ctx: MutableBuildCtx,
   mut: Mutex,
   initialContent: ProcessedContent[],
   clientRefresh: () => void,

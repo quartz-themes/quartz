@@ -57,7 +57,10 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
   return {
     name: "FrontMatter",
     markdownPlugins(ctx) {
-      const { cfg, allSlugs } = ctx
+      const { cfg } = ctx
+      // Note: Temporarily casting allSlugs to mutable for backward compatibility
+      // This should be refactored in the future to collect aliases separately
+      const allSlugs = ctx.allSlugs as FullSlug[]
       return [
         [remarkFrontmatter, ["yaml", "toml"]],
         () => {
