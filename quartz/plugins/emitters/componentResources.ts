@@ -1,4 +1,4 @@
-import { FullSlug, joinSegments } from "../../util/path"
+import { FullSlug } from "../../util/path"
 import { QuartzEmitterPlugin } from "../types"
 
 // @ts-ignore
@@ -311,7 +311,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
           const buf = await res.arrayBuffer()
           yield write({
             ctx,
-            slug: joinSegments("static", "fonts", fontFile.filename) as FullSlug,
+            slug: ctx.utils!.path.join("static", "fonts", fontFile.filename) as FullSlug,
             ext: `.${fontFile.extension}`,
             content: Buffer.from(buf),
           })

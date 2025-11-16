@@ -11,9 +11,17 @@ import {
   pathToRoot,
   splitAnchor,
   joinSegments,
+  getAllSegmentPrefixes,
+  getFileExtension,
+  isAbsoluteURL,
+  isRelativeURL,
+  resolveRelative,
+  slugTag,
+  stripSlashes,
+  QUARTZ,
 } from "../util/path"
 import { JSResource, CSSResource } from "../util/resources"
-import { escapeHTML } from "../util/escape"
+import { escapeHTML, unescapeHTML } from "../util/escape"
 
 /**
  * Plugin utility interface providing abstraction over common utility functions
@@ -25,8 +33,16 @@ export interface PluginUtilities {
     simplify: (slug: FullSlug) => SimpleSlug
     transform: (from: FullSlug, to: string, opts: TransformOptions) => RelativeURL
     toRoot: (slug: FullSlug) => RelativeURL
-    split: (slug: FullSlug) => [FullSlug, string]
-    join: (...segments: string[]) => FilePath
+    split: (slug: string) => [string, string]
+    join: (...segments: string[]) => string
+    getAllSegmentPrefixes: (tags: string) => string[]
+    getFileExtension: (s: string) => string | undefined
+    isAbsoluteURL: (s: string) => boolean
+    isRelativeURL: (s: string) => boolean
+    resolveRelative: (current: FullSlug, target: FullSlug | SimpleSlug) => RelativeURL
+    slugTag: (tag: string) => string
+    stripSlashes: (s: string, onlyStripPrefix?: boolean) => string
+    QUARTZ: string
   }
 
   // Resource management
@@ -36,9 +52,10 @@ export interface PluginUtilities {
     createCSS: (resource: CSSResource) => CSSResource
   }
 
-  // Other utilities as needed
+  // HTML escape utilities
   escape: {
     html: (text: string) => string
+    unescape: (html: string) => string
   }
 }
 
@@ -59,11 +76,19 @@ export function createPluginUtilities(): PluginUtilities {
       simplify: simplifySlug,
       transform: transformLink,
       toRoot: pathToRoot,
-      split: (slug: FullSlug) => {
+      split: (slug: string) => {
         const [path, anchor] = splitAnchor(slug)
-        return [path as FullSlug, anchor]
+        return [path, anchor]
       },
-      join: (...segments: string[]) => joinSegments(...segments) as FilePath,
+      join: (...segments: string[]) => joinSegments(...segments),
+      getAllSegmentPrefixes,
+      getFileExtension,
+      isAbsoluteURL,
+      isRelativeURL,
+      resolveRelative,
+      slugTag,
+      stripSlashes,
+      QUARTZ,
     },
     resources: {
       createExternalJS: (
@@ -86,6 +111,7 @@ export function createPluginUtilities(): PluginUtilities {
     },
     escape: {
       html: escapeHTML,
+      unescape: unescapeHTML,
     },
   }
 }

@@ -3,7 +3,7 @@ import remarkFrontmatter from "remark-frontmatter"
 import { QuartzTransformerPlugin } from "../types"
 import yaml from "js-yaml"
 import toml from "toml"
-import { FilePath, FullSlug, getFileExtension, slugifyFilePath, slugTag } from "../../util/path"
+import { FilePath, FullSlug } from "../../util/path"
 import { QuartzPluginData } from "../vfile"
 import { i18n } from "../../i18n"
 
@@ -40,18 +40,6 @@ function coerceToArray(input: string | string[]): string[] | undefined {
     .map((tag: string | number) => tag.toString())
 }
 
-function getAliasSlugs(aliases: string[]): FullSlug[] {
-  const res: FullSlug[] = []
-  for (const alias of aliases) {
-    const isMd = getFileExtension(alias) === "md"
-    const mockFp = isMd ? alias : alias + ".md"
-    const slug = slugifyFilePath(mockFp as FilePath)
-    res.push(slug)
-  }
-
-  return res
-}
-
 /**
  * @plugin FrontMatter
  * @category Transformer
@@ -69,10 +57,23 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
   return {
     name: "FrontMatter",
     markdownPlugins(ctx) {
-      const { cfg } = ctx
+      const { cfg, utils } = ctx
       // Note: Temporarily casting allSlugs to mutable for backward compatibility
       // This should be refactored in the future to collect aliases separately
       const allSlugs = ctx.allSlugs as FullSlug[]
+
+      // Helper function to get alias slugs using ctx.utils
+      const getAliasSlugs = (aliases: string[]): FullSlug[] => {
+        const res: FullSlug[] = []
+        for (const alias of aliases) {
+          const isMd = utils!.path.getFileExtension(alias) === "md"
+          const mockFp = isMd ? alias : alias + ".md"
+          const slug = utils!.path.slugify(mockFp as FilePath)
+          res.push(slug)
+        }
+        return res
+      }
+
       return [
         [remarkFrontmatter, ["yaml", "toml"]],
         () => {
@@ -93,7 +94,7 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             }
 
             const tags = coerceToArray(coalesceAliases(data, ["tags", "tag"]))
-            if (tags) data.tags = [...new Set(tags.map((tag: string) => slugTag(tag)))]
+            if (tags) data.tags = [...new Set(tags.map((tag: string) => utils!.path.slugTag(tag)))]
 
             const aliases = coerceToArray(coalesceAliases(data, ["aliases", "alias"]))
             if (aliases) {

@@ -1,7 +1,6 @@
 import { Root as HTMLRoot } from "hast"
 import { toString } from "hast-util-to-string"
 import { QuartzTransformerPlugin } from "../types"
-import { escapeHTML } from "../../util/escape"
 
 export interface Options {
   descriptionLength: number
@@ -20,16 +19,26 @@ const urlRegex = new RegExp(
   "g",
 )
 
+/**
+ * @plugin Description
+ * @category Transformer
+ *
+ * @reads vfile.data.frontmatter.description
+ * @writes vfile.data.description
+ * @writes vfile.data.text
+ *
+ * @dependencies None
+ */
 export const Description: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
     name: "Description",
-    htmlPlugins() {
+    htmlPlugins(ctx) {
       return [
         () => {
           return async (tree: HTMLRoot, file) => {
             let frontMatterDescription = file.data.frontmatter?.description
-            let text = escapeHTML(toString(tree))
+            let text = ctx.utils!.escape.html(toString(tree))
 
             if (opts.replaceExternalLinks) {
               frontMatterDescription = frontMatterDescription?.replace(

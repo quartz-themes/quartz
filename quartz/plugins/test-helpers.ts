@@ -109,8 +109,67 @@ function createMockUtilities(): PluginUtilities {
       simplify: (slug: FullSlug) => slug as unknown as SimpleSlug,
       transform: (_from: FullSlug, to: string, _opts: TransformOptions) => to as RelativeURL,
       toRoot: (_slug: FullSlug) => "/" as RelativeURL,
-      split: (slug: FullSlug) => [slug, ""],
-      join: (...segments: string[]) => segments.join("/") as FilePath,
+      split: (slug: string) => {
+        // Mock implementation of splitAnchor with special PDF handling
+        let [fp, anchor] = slug.split("#", 2)
+        if (fp.endsWith(".pdf")) {
+          return [fp, anchor === undefined ? "" : `#${anchor}`]
+        }
+        // Simplified anchor sluggification (production uses github-slugger)
+        anchor = anchor === undefined ? "" : "#" + anchor.toLowerCase().replace(/\s+/g, "-")
+        return [fp, anchor]
+      },
+      join: (...segments: string[]) => segments.join("/"),
+      getAllSegmentPrefixes: (tags: string) => {
+        const segments = tags.split("/")
+        const results: string[] = []
+        for (let i = 0; i < segments.length; i++) {
+          results.push(segments.slice(0, i + 1).join("/"))
+        }
+        return results
+      },
+      getFileExtension: (s: string) => s.match(/\.[A-Za-z0-9]+$/)?.[0],
+      isAbsoluteURL: (s: string) => {
+        try {
+          new URL(s)
+          return true
+        } catch {
+          return false
+        }
+      },
+      isRelativeURL: (s: string) => {
+        // 1. Starts with '.' or '..'
+        if (!/^\.{1,2}/.test(s)) return false
+        // 2. Does not end with 'index'
+        if (s.endsWith("index")) return false
+        // 3. File extension is not .md or .html
+        const ext = s.match(/\.[A-Za-z0-9]+$/)?.[0]?.toLowerCase()
+        if (ext === ".md" || ext === ".html") return false
+        return true
+      },
+      resolveRelative: (_current: FullSlug, target: FullSlug | SimpleSlug) =>
+        target as unknown as RelativeURL,
+      slugTag: (tag: string) => {
+        // Mock sluggify function similar to production
+        const sluggify = (segment: string) =>
+          segment
+            .toLowerCase()
+            .replace(/[&%?#]/g, "") // remove special chars
+            .replace(/\s+/g, "-") // replace spaces with dashes
+            .replace(/-+/g, "-") // collapse multiple dashes
+            .replace(/^-+|-+$/g, "") // trim leading/trailing dashes
+        return tag.split("/").map(sluggify).join("/")
+      },
+      stripSlashes: (s: string, onlyStripPrefix?: boolean) => {
+        if (s.startsWith("/")) {
+          s = s.substring(1)
+        }
+        if (!onlyStripPrefix && s.endsWith("/")) {
+          s = s.slice(0, -1)
+        }
+        return s
+      },
+      QUARTZ: "quartz",
     },
     resources: {
       createExternalJS: (src: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => ({
@@ -127,6 +186,16 @@ function createMockUtilities(): PluginUtilities {
     },
     escape: {
       html: (text: string) => text.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`),
+      // Note: This mock implementation mirrors the production code in util/escape.ts
+      // which has a known limitation of potential double-unescaping.
+      // This is acceptable as it matches the real implementation for testing purposes.
+      unescape: (html: string) =>
+        html
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;/g, "'"),
     },
   }
 }

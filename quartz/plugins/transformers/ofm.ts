@@ -13,7 +13,6 @@ import { ReplaceFunction, findAndReplace as mdastFindReplace } from "mdast-util-
 import rehypeRaw from "rehype-raw"
 import { SKIP, visit } from "unist-util-visit"
 import path from "path"
-import { splitAnchor } from "../../util/path"
 import { JSResource, CSSResource } from "../../util/resources"
 // @ts-ignore
 import calloutScript from "../../components/scripts/callout.inline"
@@ -22,7 +21,7 @@ import checkboxScript from "../../components/scripts/checkbox.inline"
 // @ts-ignore
 import mermaidScript from "../../components/scripts/mermaid.inline"
 import mermaidStyle from "../../components/styles/mermaid.inline.scss"
-import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
+import { FilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
 import { capitalize } from "../../util/lang"
@@ -158,7 +157,8 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
 
   return {
     name: "ObsidianFlavoredMarkdown",
-    textTransform(_ctx, src) {
+    textTransform(ctx, src) {
+      const { utils } = ctx
       // do comments at text level
       if (opts.comments) {
         src = src.replace(commentRegex, "")
@@ -192,7 +192,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
         src = src.replace(wikilinkRegex, (value, ...capture) => {
           const [rawFp, rawHeader, rawAlias]: (string | undefined)[] = capture
 
-          const [fp, anchor] = splitAnchor(`${rawFp ?? ""}${rawHeader ?? ""}`)
+          const [fp, anchor] = utils!.path.split(`${rawFp ?? ""}${rawHeader ?? ""}`)
           const blockRef = Boolean(rawHeader?.startsWith("#^")) ? "^" : ""
           const displayAnchor = anchor ? `#${blockRef}${anchor.trim().replace(/^#+/, "")}` : ""
           const displayAlias = rawAlias ?? rawHeader?.replace("#", "|") ?? ""
@@ -209,13 +209,14 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
       return src
     },
     markdownPlugins(ctx) {
+      const { utils } = ctx
       const plugins: PluggableList = []
 
       // regex replacements
       plugins.push(() => {
         return (tree: Root, file) => {
           const replacements: [RegExp, string | ReplaceFunction][] = []
-          const base = pathToRoot(file.data.slug!)
+          const base = utils!.path.toRoot(file.data.slug!)
 
           if (opts.wikilinks) {
             replacements.push([
@@ -229,7 +230,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                 // embed cases
                 if (value.startsWith("!")) {
                   const ext: string = path.extname(fp).toLowerCase()
-                  const url = slugifyFilePath(fp as FilePath)
+                  const url = utils!.path.slugify(fp as FilePath)
                   if ([".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp"].includes(ext)) {
                     const match = wikilinkImageEmbedRegex.exec(alias ?? "")
                     const alt = match?.groups?.alt ?? ""
@@ -279,7 +280,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
 
                 // treat as broken link if slug not in ctx.allSlugs
                 if (opts.disableBrokenWikilinks) {
-                  const slug = slugifyFilePath(fp as FilePath)
+                  const slug = utils!.path.slugify(fp as FilePath)
                   const exists = ctx.allSlugs && ctx.allSlugs.includes(slug)
                   if (!exists) {
                     return {
@@ -342,7 +343,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                   return false
                 }
 
-                tag = slugTag(tag)
+                tag = utils!.path.slugTag(tag)
                 if (file.data.frontmatter) {
                   const noteTags = file.data.frontmatter.tags ?? []
                   file.data.frontmatter.tags = [...new Set([...noteTags, tag])]

@@ -5,13 +5,14 @@ import BodyConstructor from "../../components/Body"
 import { pageResources, renderPage } from "../../components/renderPage"
 import { ProcessedContent, QuartzPluginData, defaultProcessedContent } from "../vfile"
 import { FullPageLayout } from "../../cfg"
-import { FullSlug, getAllSegmentPrefixes, joinSegments, pathToRoot } from "../../util/path"
+import { FullSlug } from "../../util/path"
 import { defaultListPageLayout, sharedPageComponents } from "../../../quartz.layout"
 import { TagContent } from "../../components"
 import { write } from "./helpers"
 import { i18n, TRANSLATIONS } from "../../i18n"
 import { BuildCtx } from "../../util/ctx"
 import { StaticResources } from "../../util/resources"
+import { PluginUtilities } from "../plugin-context"
 
 interface TagPageOptions extends FullPageLayout {
   sort?: (f1: QuartzPluginData, f2: QuartzPluginData) => number
@@ -21,9 +22,12 @@ function computeTagInfo(
   allFiles: QuartzPluginData[],
   content: ProcessedContent[],
   locale: keyof typeof TRANSLATIONS,
+  utils: PluginUtilities,
 ): [Set<string>, Record<string, ProcessedContent>] {
   const tags: Set<string> = new Set(
-    allFiles.flatMap((data) => data.frontmatter?.tags ?? []).flatMap(getAllSegmentPrefixes),
+    allFiles
+      .flatMap((data) => data.frontmatter?.tags ?? [])
+      .flatMap(utils.path.getAllSegmentPrefixes),
   )
 
   // add base tag
@@ -38,7 +42,7 @@ function computeTagInfo(
       return [
         tag,
         defaultProcessedContent({
-          slug: joinSegments("tags", tag) as FullSlug,
+          slug: utils.path.join("tags", tag) as FullSlug,
           frontmatter: { title, tags: [] },
         }),
       ]
@@ -70,10 +74,11 @@ async function processTagPage(
   opts: FullPageLayout,
   resources: StaticResources,
 ) {
-  const slug = joinSegments("tags", tag) as FullSlug
+  const { utils } = ctx
+  const slug = utils!.path.join("tags", tag) as FullSlug
   const [tree, file] = tagContent
   const cfg = ctx.cfg.configuration
-  const externalResources = pageResources(pathToRoot(slug), resources)
+  const externalResources = pageResources(utils!.path.toRoot(slug), resources)
   const componentData: QuartzComponentProps = {
     ctx,
     fileData: file.data,
@@ -122,15 +127,17 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
       ]
     },
     async *emit(ctx, content, resources) {
+      const { utils } = ctx
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
-      const [tags, tagDescriptions] = computeTagInfo(allFiles, content, cfg.locale)
+      const [tags, tagDescriptions] = computeTagInfo(allFiles, content, cfg.locale, utils!)
 
       for (const tag of tags) {
         yield processTagPage(ctx, tag, tagDescriptions[tag], allFiles, opts, resources)
       }
     },
     async *partialEmit(ctx, content, resources, changeEvents) {
+      const { utils } = ctx
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
 
@@ -148,7 +155,7 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
 
         // If a file with tags changed, we need to update those tag pages
         const fileTags = changeEvent.file.data.frontmatter?.tags ?? []
-        fileTags.flatMap(getAllSegmentPrefixes).forEach((tag) => affectedTags.add(tag))
+        fileTags.flatMap(utils!.path.getAllSegmentPrefixes).forEach((tag) => affectedTags.add(tag))
 
         // Always update the index tag page if any file changes
         affectedTags.add("index")
@@ -157,7 +164,7 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
       // If there are affected tags, rebuild their pages
       if (affectedTags.size > 0) {
         // We still need to compute all tags because tag pages show all tags
-        const [_tags, tagDescriptions] = computeTagInfo(allFiles, content, cfg.locale)
+        const [_tags, tagDescriptions] = computeTagInfo(allFiles, content, cfg.locale, utils!)
 
         for (const tag of affectedTags) {
           if (tagDescriptions[tag]) {

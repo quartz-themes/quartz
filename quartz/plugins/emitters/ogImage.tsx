@@ -1,7 +1,6 @@
 import { QuartzEmitterPlugin } from "../types"
 import { i18n } from "../../i18n"
-import { unescapeHTML } from "../../util/escape"
-import { FullSlug, getFileExtension, isAbsoluteURL, joinSegments, QUARTZ } from "../../util/path"
+import { FullSlug } from "../../util/path"
 import { ImageOptions, SocialImageOptions, defaultImage, getSatoriFonts } from "../../util/og"
 import sharp from "sharp"
 import satori, { SatoriOptions } from "satori"
@@ -12,6 +11,7 @@ import { BuildCtx } from "../../util/ctx"
 import { QuartzPluginData } from "../vfile"
 import fs from "node:fs/promises"
 import { styleText } from "util"
+import { PluginUtilities } from "../plugin-context"
 
 const defaultOptions: SocialImageOptions = {
   colorScheme: "lightMode",
@@ -28,9 +28,10 @@ const defaultOptions: SocialImageOptions = {
 async function generateSocialImage(
   { cfg, description, fonts, title, fileData }: ImageOptions,
   userOpts: SocialImageOptions,
+  utils: PluginUtilities,
 ): Promise<Readable> {
   const { width, height } = userOpts
-  const iconPath = joinSegments(QUARTZ, "static", "icon.png")
+  const iconPath = utils.path.join(utils.path.QUARTZ, "static", "icon.png")
   let iconBase64: string | undefined = undefined
   try {
     const iconData = await fs.readFile(iconPath)
@@ -71,6 +72,7 @@ async function processOgImage(
   fonts: SatoriOptions["fonts"],
   fullOptions: SocialImageOptions,
 ) {
+  const { utils } = ctx
   const cfg = ctx.cfg.configuration
   const slug = fileData.slug!
   const titleSuffix = cfg.pageTitleSuffix ?? ""
@@ -79,7 +81,9 @@ async function processOgImage(
   const description =
     fileData.frontmatter?.socialDescription ??
     fileData.frontmatter?.description ??
-    unescapeHTML(fileData.description?.trim() ?? i18n(cfg.locale).propertyDefaults.description)
+    utils!.escape.unescape(
+      fileData.description?.trim() ?? i18n(cfg.locale).propertyDefaults.description,
+    )
 
   const stream = await generateSocialImage(
     {
@@ -90,6 +94,7 @@ async function processOgImage(
       fileData,
     },
     fullOptions,
+    utils!,
   )
 
   return write({
@@ -136,6 +141,7 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
       }
     },
     externalResources: (ctx) => {
+      const { utils } = ctx
       if (!ctx.cfg.configuration.baseUrl) {
         return {}
       }
@@ -148,7 +154,7 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
             let userDefinedOgImagePath = pageData.frontmatter?.socialImage
 
             if (userDefinedOgImagePath) {
-              userDefinedOgImagePath = isAbsoluteURL(userDefinedOgImagePath)
+              userDefinedOgImagePath = utils!.path.isAbsoluteURL(userDefinedOgImagePath)
                 ? userDefinedOgImagePath
                 : `https://${baseUrl}/static/${userDefinedOgImagePath}`
             }
@@ -158,7 +164,7 @@ export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = 
               : undefined
             const defaultOgImagePath = `https://${baseUrl}/static/og-image.png`
             const ogImagePath = userDefinedOgImagePath ?? generatedOgImagePath ?? defaultOgImagePath
-            const ogImageMimeType = `image/${getFileExtension(ogImagePath) ?? "png"}`
+            const ogImageMimeType = `image/${utils!.path.getFileExtension(ogImagePath) ?? "png"}`
             return (
               <>
                 {!userDefinedOgImagePath && (
