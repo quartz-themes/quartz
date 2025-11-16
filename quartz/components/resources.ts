@@ -49,6 +49,8 @@ export function getComponentJS(type: ComponentResourceType): JSResource | null {
         moduleType: "module",
       }
   }
+  const _exhaustive: never = type
+  throw new Error(`Unhandled component type: ${_exhaustive}`)
 }
 
 /**
@@ -65,6 +67,8 @@ export function getComponentCSS(type: ComponentResourceType): CSSResource | null
         inline: true,
       }
   }
+  const _exhaustive: never = type
+  throw new Error(`Unhandled component type: ${_exhaustive}`)
 }
 
 /**
