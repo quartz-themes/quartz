@@ -249,7 +249,7 @@ export interface TransformerVFileData {
     publish?: boolean | string
     draft?: boolean | string
     lang?: string
-    enableToc?: string
+    enableToc?: boolean | string
     cssclasses?: string[]
     socialImage?: string
     comments?: boolean | string
@@ -339,7 +339,8 @@ export interface PluginUtilities {
   
   // Resource management
   resources: {
-    createJS: (resource: Omit<JSResource, 'loadTime' | 'contentType'> & Partial<Pick<JSResource, 'loadTime' | 'contentType'>>) => JSResource
+    createExternalJS: (src: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => JSResource
+    createInlineJS: (script: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => JSResource
     createCSS: (resource: CSSResource) => CSSResource
   }
   
@@ -419,7 +420,6 @@ import { PluginContext } from "./plugin-context"
 import { ProcessedContent } from "./vfile"
 import { StaticResources } from "../util/resources"
 import { FilePath } from "../util/path"
-import { ChangeEvent } from "./types"
 
 export type QuartzEmitterPluginInstance = {
   name: string
@@ -536,8 +536,13 @@ export interface QuartzTransformerPluginInstance {
 // quartz/plugins/test-helpers.ts
 
 import { VFile } from "vfile"
-import { PluginContext, QuartzVFileData } from "./plugin-context"
-import { FullSlug, FilePath } from "../util/path"
+import { PluginContext } from "./plugin-context"
+import { QuartzVFileData } from "./vfile-schema"
+import { FullSlug, FilePath, SimpleSlug, RelativeURL, TransformOptions } from "../util/path"
+import { QuartzConfig } from "../cfg"
+import { Argv } from "../util/ctx"
+import { PluginUtilities } from "./plugin-context"
+import { JSResource, CSSResource } from "../util/resources"
 
 export function createMockPluginContext(overrides?: Partial<PluginContext>): PluginContext {
   return {
@@ -569,7 +574,44 @@ function createMockConfig(): QuartzConfig {
       pageTitle: "Test Site",
       baseUrl: "test.com",
       locale: "en-US",
-      // Add other minimal config properties as needed
+      enableSPA: true,
+      enablePopovers: true,
+      analytics: null,
+      ignorePatterns: [],
+      defaultDateType: "created",
+      theme: {
+        typography: {
+          header: "Schibsted Grotesk",
+          body: "Source Sans Pro",
+          code: "IBM Plex Mono",
+        },
+        colors: {
+          lightMode: {
+            light: "#faf8f8",
+            lightgray: "#e5e5e5",
+            gray: "#b8b8b8",
+            darkgray: "#4e4e4e",
+            dark: "#2b2b2b",
+            secondary: "#284b63",
+            tertiary: "#84a59d",
+            highlight: "rgba(143, 159, 169, 0.15)",
+            textHighlight: "#fff23688",
+          },
+          darkMode: {
+            light: "#161618",
+            lightgray: "#393639",
+            gray: "#646464",
+            darkgray: "#d4d4d4",
+            dark: "#ebebec",
+            secondary: "#7b97aa",
+            tertiary: "#84a59d",
+            highlight: "rgba(143, 159, 169, 0.15)",
+            textHighlight: "#b3aa0288",
+          },
+        },
+        fontOrigin: "googleFonts",
+        cdnCaching: true,
+      },
     },
     plugins: {
       transformers: [],
@@ -602,8 +644,17 @@ function createMockUtilities(): PluginUtilities {
       join: (...segments: string[]) => segments.join("/") as FilePath,
     },
     resources: {
-      createJS: (resource: any) => resource as JSResource,
-      createCSS: (resource: any) => resource as CSSResource,
+      createExternalJS: (src: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => ({
+        src,
+        contentType: "external" as const,
+        loadTime: loadTime ?? "afterDOMReady",
+      }),
+      createInlineJS: (script: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => ({
+        script,
+        contentType: "inline" as const,
+        loadTime: loadTime ?? "afterDOMReady",
+      }),
+      createCSS: (resource: CSSResource) => resource,
     },
     escape: {
       html: (text: string) => text.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`),
@@ -704,7 +755,7 @@ const toc = file.data.toc
 
 **After**:
 ```typescript
-import { QuartzVFileData } from "../vfile-schema"
+import { QuartzVFileData, TocEntry } from "../vfile-schema"
 
 // Type-safe access with explicit type
 const toc: TocEntry[] | undefined = file.data.toc
