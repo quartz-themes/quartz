@@ -49,8 +49,6 @@ function coerceToArray(input: string | string[]): string[] | undefined {
  * @writes vfile.data.aliases
  *
  * @dependencies None
- * @note This plugin temporarily mutates ctx.allSlugs for alias registration.
- *       This should be refactored in the future to collect aliases separately.
  */
 export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
@@ -58,9 +56,6 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
     name: "FrontMatter",
     markdownPlugins(ctx) {
       const { cfg, utils } = ctx
-      // Note: Temporarily casting allSlugs to mutable for backward compatibility
-      // This should be refactored in the future to collect aliases separately
-      const allSlugs = ctx.allSlugs as FullSlug[]
 
       // Helper function to get alias slugs using ctx.utils
       const getAliasSlugs = (aliases: string[]): FullSlug[] => {
@@ -100,7 +95,6 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             if (aliases) {
               data.aliases = aliases // frontmatter
               file.data.aliases = getAliasSlugs(aliases)
-              allSlugs.push(...file.data.aliases)
             }
 
             if (data.permalink != null && data.permalink.toString() !== "") {
@@ -108,7 +102,6 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
               const aliases = file.data.aliases ?? []
               aliases.push(data.permalink)
               file.data.aliases = aliases
-              allSlugs.push(data.permalink)
             }
 
             const cssclasses = coerceToArray(coalesceAliases(data, ["cssclasses", "cssclass"]))
@@ -134,10 +127,6 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             if (published) data.published = published
 
             if (socialImage) data.socialImage = socialImage
-
-            // Remove duplicate slugs
-            const uniqueSlugs = [...new Set(allSlugs)]
-            allSlugs.splice(0, allSlugs.length, ...uniqueSlugs)
 
             // fill in frontmatter
             file.data.frontmatter = data as QuartzPluginData["frontmatter"]
