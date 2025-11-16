@@ -17,6 +17,7 @@ import {
   isRelativeURL,
   resolveRelative,
   slugTag,
+  stripSlashes,
   QUARTZ,
 } from "../util/path"
 import { JSResource, CSSResource } from "../util/resources"
@@ -32,7 +33,7 @@ export interface PluginUtilities {
     simplify: (slug: FullSlug) => SimpleSlug
     transform: (from: FullSlug, to: string, opts: TransformOptions) => RelativeURL
     toRoot: (slug: FullSlug) => RelativeURL
-    split: (slug: FullSlug) => [FullSlug, string]
+    split: (slug: string) => [string, string]
     join: (...segments: string[]) => FilePath
     getAllSegmentPrefixes: (tags: string) => string[]
     getFileExtension: (s: string) => string | undefined
@@ -40,6 +41,7 @@ export interface PluginUtilities {
     isRelativeURL: (s: string) => boolean
     resolveRelative: (current: FullSlug, target: FullSlug | SimpleSlug) => RelativeURL
     slugTag: (tag: string) => string
+    stripSlashes: (s: string, onlyStripPrefix?: boolean) => string
     QUARTZ: string
   }
 
@@ -74,9 +76,9 @@ export function createPluginUtilities(): PluginUtilities {
       simplify: simplifySlug,
       transform: transformLink,
       toRoot: pathToRoot,
-      split: (slug: FullSlug) => {
+      split: (slug: string) => {
         const [path, anchor] = splitAnchor(slug)
-        return [path as FullSlug, anchor]
+        return [path, anchor]
       },
       join: (...segments: string[]) => joinSegments(...segments) as FilePath,
       getAllSegmentPrefixes,
@@ -85,6 +87,7 @@ export function createPluginUtilities(): PluginUtilities {
       isRelativeURL,
       resolveRelative,
       slugTag,
+      stripSlashes,
       QUARTZ,
     },
     resources: {

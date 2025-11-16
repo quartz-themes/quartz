@@ -109,7 +109,10 @@ function createMockUtilities(): PluginUtilities {
       simplify: (slug: FullSlug) => slug as unknown as SimpleSlug,
       transform: (_from: FullSlug, to: string, _opts: TransformOptions) => to as RelativeURL,
       toRoot: (_slug: FullSlug) => "/" as RelativeURL,
-      split: (slug: FullSlug) => [slug, ""],
+      split: (slug: string) => {
+        const parts = slug.split("#", 2)
+        return [parts[0], parts[1] || ""]
+      },
       join: (...segments: string[]) => segments.join("/") as FilePath,
       getAllSegmentPrefixes: (tags: string) => tags.split("/"),
       getFileExtension: (s: string) => s.match(/\.[A-Za-z0-9]+$/)?.[0],
@@ -125,6 +128,8 @@ function createMockUtilities(): PluginUtilities {
       resolveRelative: (_current: FullSlug, target: FullSlug | SimpleSlug) =>
         target as unknown as RelativeURL,
       slugTag: (tag: string) => tag.toLowerCase().replace(/\s+/g, "-"),
+      stripSlashes: (s: string, onlyStripPrefix?: boolean) =>
+        onlyStripPrefix ? s.replace(/^\/+/, "") : s.replace(/^\/+|\/+$/g, ""),
       QUARTZ: "quartz",
     },
     resources: {
