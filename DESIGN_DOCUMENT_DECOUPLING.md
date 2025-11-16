@@ -754,6 +754,7 @@ describe("TableOfContents", () => {
 **Risks**: Medium - may reveal unexpected mutation patterns
 
 **Status**: ✅ **COMPLETED** in this PR (commits d227a80, d8a5304, 5e4293a)
+
 - BuildCtx is now fully readonly with all properties marked as `readonly`
 - FrontMatter plugin no longer mutates `ctx.allSlugs`
 - Alias collection moved to build orchestration layer
@@ -772,6 +773,7 @@ describe("TableOfContents", () => {
 **Risks**: Medium - requires comprehensive testing
 
 **Status**: ✅ **MOSTLY COMPLETED** in PR #5
+
 - All plugins now use `ctx.utils` instead of direct utility imports
 - Filters have minimal coupling (no direct path utility usage)
 - Transformers and emitters migrated to new pattern
@@ -788,6 +790,7 @@ describe("TableOfContents", () => {
 **Risks**: Low - cleanup phase
 
 **Status**: ⏳ **PENDING**
+
 - Module augmentations are currently intentional (per design in vfile-schema.ts)
 - No deprecated patterns to remove yet
 - Documentation in design document is comprehensive
@@ -799,23 +802,27 @@ describe("TableOfContents", () => {
 ### ✅ Completed Phases (1-5)
 
 **Phase 1: Foundation** - ✅ DONE (PR #5)
+
 - ✅ Created `vfile-schema.ts` with centralized data definitions
 - ✅ Created `plugin-context.ts` with PluginUtilities interface
 - ✅ Created `test-helpers.ts` for plugin testing
 - ✅ Created `shared-types.ts` to break component-emitter coupling
 
 **Phase 2: Utility Abstraction** - ✅ DONE (PR #5)
+
 - ✅ All plugins migrated to use `ctx.utils` instead of direct imports
 - ✅ `createPluginUtilities()` injected into BuildCtx
 - ✅ No plugins import path utilities directly
 
 **Phase 3: Component Decoupling** - ✅ DONE (PR #5)
+
 - ✅ Created `components/resources.ts` registry
 - ✅ Moved component scripts from transformers to registry
 - ✅ Transformers no longer import component scripts directly
 - ✅ Component resources accessed via `getComponentJS()` and `getComponentCSS()`
 
 **Phase 4: Immutability & Safety** - ✅ DONE (This PR)
+
 - ✅ Made BuildCtx fully immutable (all properties readonly)
 - ✅ Removed FrontMatter plugin's mutation of `ctx.allSlugs`
 - ✅ Created `collectAliases()` helper in build orchestration
@@ -823,6 +830,7 @@ describe("TableOfContents", () => {
 - ✅ Plugins communicate exclusively via `vfile.data`
 
 **Phase 5: Full Migration** - ✅ MOSTLY DONE (PR #5)
+
 - ✅ All transformers use new pattern
 - ✅ All filters use new pattern
 - ✅ All emitters use new pattern
@@ -831,6 +839,7 @@ describe("TableOfContents", () => {
 ### ⏳ Remaining Work
 
 **Phase 6: Cleanup** - ⏳ OPTIONAL
+
 - Module augmentations are intentional by design
 - No breaking changes needed
 - Future performance benchmarking could be added
@@ -838,6 +847,7 @@ describe("TableOfContents", () => {
 ### 📊 Metrics Achieved
 
 From Section 6.1 (Quantitative Metrics):
+
 - ✅ **Import reduction**: 100% reduction in direct utility imports from plugins
 - ✅ **Test coverage**: Test helpers available for all plugins
 - ✅ **Type safety**: Zero `any` types in vfile data access via centralized schema
@@ -847,6 +857,7 @@ From Section 6.1 (Quantitative Metrics):
 ### 🎯 Success Criteria Met
 
 All primary objectives from Section 2.1 achieved:
+
 1. ✅ **Isolate plugin logic**: Plugins are independently testable
 2. ✅ **Minimize shared dependencies**: Reduced coupling to utility modules via abstraction
 3. ✅ **Standardize data contracts**: Formalized vfile data schema

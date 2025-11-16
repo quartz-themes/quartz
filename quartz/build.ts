@@ -94,11 +94,11 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
   ctx.allSlugs = allFiles.map((fp) => slugifyFilePath(fp as FilePath))
 
   const parsedFiles = await parseMarkdown(ctx, filePaths)
-  
+
   // Collect aliases from parsed files and update context immutably
   const discoveredAliases = collectAliases(parsedFiles)
   ctx.allSlugs = [...new Set([...ctx.allSlugs, ...discoveredAliases])]
-  
+
   const filteredContent = filterContent(ctx, parsedFiles)
 
   await emitContent(ctx, filteredContent)
@@ -271,7 +271,7 @@ async function rebuild(changes: ChangeEvent[], clientRefresh: () => void, buildD
   // update allFiles and then allSlugs with the consistent view of content map
   ctx.allFiles = Array.from(contentMap.keys())
   ctx.allSlugs = ctx.allFiles.map((fp) => slugifyFilePath(fp as FilePath))
-  
+
   // Collect aliases from all markdown files before filtering for consistency
   const allMarkdownFiles = Array.from(contentMap.values())
     .filter((file) => file.type === "markdown")
