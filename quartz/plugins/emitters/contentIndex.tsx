@@ -1,25 +1,16 @@
 import { Root } from "hast"
 import { GlobalConfiguration } from "../../cfg"
 import { getDate } from "../../components/Date"
-import { FilePath, FullSlug, SimpleSlug } from "../../util/path"
+import { FullSlug, SimpleSlug } from "../../util/path"
 import { QuartzEmitterPlugin } from "../types"
 import { toHtml } from "hast-util-to-html"
 import { write } from "./helpers"
 import { i18n } from "../../i18n"
 import { PluginUtilities } from "../plugin-context"
+import { ContentDetails, ContentIndexMap } from "../shared-types"
 
-export type ContentIndexMap = Map<FullSlug, ContentDetails>
-export type ContentDetails = {
-  slug: FullSlug
-  filePath: FilePath
-  title: string
-  links: SimpleSlug[]
-  tags: string[]
-  content: string
-  richContent?: string
-  date?: Date
-  description?: string
-}
+// Re-export for backward compatibility
+export type { ContentDetails, ContentIndexMap }
 
 interface Options {
   enableSiteMap: boolean

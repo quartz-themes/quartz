@@ -1,4 +1,4 @@
-import type { ContentDetails } from "../../plugins/emitters/contentIndex"
+import type { ContentDetails } from "../../plugins/shared-types"
 import {
   SimulationNodeDatum,
   SimulationLinkDatum,
