@@ -168,6 +168,65 @@ All existing plugins continue to work without changes. The new utilities are opt
 - **Clearer Contracts**: Document what plugins read/write
 - **Future-Proof**: Easier to version and update utilities
 
+## Adding Custom VFile Fields
+
+Custom plugins can add their own fields to the vfile data using TypeScript module augmentation:
+
+```typescript
+import { QuartzTransformerPlugin } from "../types"
+
+export interface MyCustomData {
+  customField: string
+  anotherField: number[]
+}
+
+/**
+ * @plugin MyCustomPlugin
+ * @category Transformer
+ *
+ * @writes vfile.data.myCustomData
+ */
+export const MyCustomPlugin: QuartzTransformerPlugin = () => ({
+  name: "MyCustomPlugin",
+  markdownPlugins() {
+    return [
+      () => {
+        return (tree, file) => {
+          // Add your custom data
+          file.data.myCustomData = {
+            customField: "value",
+            anotherField: [1, 2, 3],
+          }
+        }
+      },
+    ]
+  },
+})
+
+// Extend the VFile DataMap with your custom fields
+declare module "vfile" {
+  interface DataMap {
+    myCustomData?: MyCustomData
+  }
+}
+```
+
+**How it works:**
+
+- TypeScript's module augmentation allows multiple `declare module "vfile"` statements
+- Each declaration merges into the same `DataMap` interface
+- Your custom fields become type-safe alongside built-in fields
+- The centralized `vfile-schema.ts` doesn't prevent custom extensions
+
+**Best practices:**
+
+1. Export your custom data type interfaces for reuse
+2. Use optional fields (`?`) to indicate data may not always be present
+3. Document what your plugin writes with JSDoc `@writes` annotation
+4. Add the module augmentation at the bottom of your plugin file
+
+This allows third-party and custom plugins to extend the vfile data structure without modifying core files.
+
 ## Next Steps
 
 For more details, see:
