@@ -276,16 +276,15 @@ async function rebuild(changes: ChangeEvent[], clientRefresh: () => void, buildD
   ctx.allFiles = Array.from(contentMap.keys())
   ctx.allSlugs = ctx.allFiles.map((fp) => slugifyFilePath(fp as FilePath))
   
-  let processedFiles = filterContent(
-    ctx,
-    Array.from(contentMap.values())
-      .filter((file) => file.type === "markdown")
-      .map((file) => file.content),
-  )
-  
-  // Collect aliases from all processed files and update context immutably
-  const discoveredAliases = collectAliases(processedFiles)
+  // Collect aliases from all markdown files before filtering for consistency
+  const allMarkdownFiles = Array.from(contentMap.values())
+    .filter((file) => file.type === "markdown")
+    .map((file) => file.content)
+
+  const discoveredAliases = collectAliases(allMarkdownFiles)
   ctx.allSlugs = [...new Set([...ctx.allSlugs, ...discoveredAliases])]
+
+  let processedFiles = filterContent(ctx, allMarkdownFiles)
 
   let emittedFiles = 0
   for (const emitter of cfg.plugins.emitters) {
