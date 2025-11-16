@@ -29,6 +29,15 @@ const defaultOptions: Options = {
   attributeComponent: true,
 }
 
+/**
+ * @plugin RoamFlavoredMarkdown
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (transforms Roam Research specific syntax)
+ *
+ * @dependencies None
+ */
 const orRegex = new RegExp(/{{or:(.*?)}}/, "g")
 const TODORegex = new RegExp(/{{.*?\bTODO\b.*?}}/, "g")
 const DONERegex = new RegExp(/{{.*?\bDONE\b.*?}}/, "g")

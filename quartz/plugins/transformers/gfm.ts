@@ -14,6 +14,15 @@ const defaultOptions: Options = {
   linkHeadings: true,
 }
 
+/**
+ * @plugin GitHubFlavoredMarkdown
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (transforms markdown to HTML with GFM extensions)
+ *
+ * @dependencies None
+ */
 export const GitHubFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
