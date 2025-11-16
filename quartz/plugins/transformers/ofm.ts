@@ -14,13 +14,7 @@ import rehypeRaw from "rehype-raw"
 import { SKIP, visit } from "unist-util-visit"
 import path from "path"
 import { JSResource, CSSResource } from "../../util/resources"
-// @ts-ignore
-import calloutScript from "../../components/scripts/callout.inline"
-// @ts-ignore
-import checkboxScript from "../../components/scripts/checkbox.inline"
-// @ts-ignore
-import mermaidScript from "../../components/scripts/mermaid.inline"
-import mermaidStyle from "../../components/styles/mermaid.inline.scss"
+import { getComponentJS, getComponentCSS } from "../../components/resources"
 import { FilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
@@ -147,6 +141,23 @@ const wikilinkImageEmbedRegex = new RegExp(
   /^(?<alt>(?!^\d*x?\d*$).*?)?(\|?\s*?(?<width>\d+)(x(?<height>\d+))?)?$/,
 )
 
+/**
+ * @plugin ObsidianFlavoredMarkdown
+ * @category Transformer
+ *
+ * @reads vfile.data.slug
+ * @reads vfile.data.frontmatter (for wikilink processing and tag extraction)
+ * @writes vfile.data.frontmatter.tags (when parseTags is enabled)
+ * @writes vfile.data.blocks
+ * @writes vfile.data.htmlAst
+ * @writes vfile.data.hasMermaidDiagram
+ *
+ * @dependencies None
+ *
+ * @description Processes Obsidian-flavored markdown including wikilinks, callouts,
+ * highlights, comments, mermaid diagrams, checkboxes, and tables. Conditionally
+ * registers component resources (callout, checkbox, mermaid) only if the corresponding options are enabled.
+ */
 export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
 
@@ -751,33 +762,20 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
       const css: CSSResource[] = []
 
       if (opts.enableCheckbox) {
-        js.push({
-          script: checkboxScript,
-          loadTime: "afterDOMReady",
-          contentType: "inline",
-        })
+        js.push(getComponentJS("checkbox"))
       }
 
       if (opts.callouts) {
-        js.push({
-          script: calloutScript,
-          loadTime: "afterDOMReady",
-          contentType: "inline",
-        })
+        js.push(getComponentJS("callout"))
       }
 
       if (opts.mermaid) {
-        js.push({
-          script: mermaidScript,
-          loadTime: "afterDOMReady",
-          contentType: "inline",
-          moduleType: "module",
-        })
+        js.push(getComponentJS("mermaid"))
 
-        css.push({
-          content: mermaidStyle,
-          inline: true,
-        })
+        const mermaidCSSRes = getComponentCSS("mermaid")
+        if (mermaidCSSRes) {
+          css.push(mermaidCSSRes)
+        }
       }
 
       return { js, css }

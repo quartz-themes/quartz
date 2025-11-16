@@ -1,6 +1,6 @@
 import { FileTrieNode } from "../../util/fileTrie"
 import { FullSlug, resolveRelative, simplifySlug } from "../../util/path"
-import { ContentDetails } from "../../plugins/emitters/contentIndex"
+import { ContentDetails } from "../../plugins/shared-types"
 
 type MaybeHTMLElement = HTMLElement | undefined
 

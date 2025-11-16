@@ -17,6 +17,15 @@ const defaultOptions: Options = {
   csl: "apa",
 }
 
+/**
+ * @plugin Citations
+ * @category Transformer
+ *
+ * @reads None
+ * @writes vfile.data.citations
+ *
+ * @dependencies None
+ */
 export const Citations: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {

@@ -12,6 +12,10 @@ import { QuartzPluginData } from "../vfile"
 import fs from "node:fs/promises"
 import { styleText } from "util"
 import { PluginUtilities } from "../plugin-context"
+import { CustomOgImagesEmitterName } from "../shared-types"
+
+// Re-export for backward compatibility
+export { CustomOgImagesEmitterName }
 
 const defaultOptions: SocialImageOptions = {
   colorScheme: "lightMode",
@@ -105,7 +109,6 @@ async function processOgImage(
   })
 }
 
-export const CustomOgImagesEmitterName = "CustomOgImages"
 export const CustomOgImages: QuartzEmitterPlugin<Partial<SocialImageOptions>> = (userOpts) => {
   const fullOptions = { ...defaultOptions, ...userOpts }
 
