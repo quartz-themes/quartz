@@ -212,6 +212,8 @@ Despite coupling issues, the current architecture has strengths to preserve:
 ```typescript
 // quartz/plugins/vfile-schema.ts
 
+import { FullSlug, FilePath, SimpleSlug } from "../util/path"
+
 /**
  * Core data set by the processing pipeline before any plugins
  */
@@ -312,6 +314,11 @@ export const TableOfContents: QuartzTransformerPlugin = ...
 ```typescript
 // quartz/plugins/plugin-context.ts
 
+import { FullSlug, FilePath, SimpleSlug, RelativeURL, TransformOptions } from "../util/path"
+import { JSResource, CSSResource } from "../util/resources"
+import { QuartzConfig } from "../cfg"
+import { Argv } from "../util/ctx"
+
 export interface PluginUtilities {
   // Path operations
   path: {
@@ -387,6 +394,8 @@ export const CrawlLinks: QuartzTransformerPlugin<Options> = (userOpts) => {
 ```typescript
 // quartz/components/registry.ts
 
+import { QuartzComponent } from "./types"
+
 export interface ComponentRegistry {
   register(name: string, component: QuartzComponent): void
   get(name: string): QuartzComponent | undefined
@@ -398,6 +407,13 @@ export interface ComponentRegistry {
 }
 
 // quartz/plugins/types.ts
+
+import { PluginContext } from "./plugin-context"
+import { ProcessedContent } from "./vfile"
+import { StaticResources } from "../util/resources"
+import { FilePath } from "../util/path"
+import { ChangeEvent } from "./types"
+
 export type QuartzEmitterPluginInstance = {
   name: string
   emit: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources) => Promise<FilePath[]> | AsyncGenerator<FilePath>
@@ -425,11 +441,13 @@ import calloutScript from "../../components/scripts/callout.inline"
 
 // New approach:
 // quartz/components/Callout.tsx
-export default (() => {
-  const Callout: QuartzComponent = (props) => { /* ... */ }
-  Callout.afterDOMLoaded = calloutScript
-  return Callout
-}) satisfies QuartzComponentConstructor
+const Callout: QuartzComponentConstructor = (opts) => {
+  const component: QuartzComponent = (props) => { /* ... */ }
+  component.afterDOMLoaded = calloutScript
+  return component
+}
+
+export default Callout
 
 // Transformer just declares it needs the component:
 export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin = (opts) => {
@@ -490,7 +508,6 @@ export interface QuartzTransformerPluginInstance {
   init?: (ctx: PluginContext) => {
     vfileDataKeys?: string[]  // What keys this plugin writes to vfile.data
     aliases?: FullSlug[]       // Any aliases this plugin discovers
-    externalResources?: Partial<StaticResources>
   }
   
   textTransform?: (ctx: PluginContext, src: string) => string
@@ -501,8 +518,9 @@ export interface QuartzTransformerPluginInstance {
 ```
 
 **Benefits**:
-- Plugins declare their effects upfront
+- Plugins declare their effects upfront via `init()` method
 - Build system can collect all aliases before processing
+- Runtime resources still provided via `externalResources()` method
 - Better static analysis of plugin behavior
 
 ### 3.6 Phase 6: Testing Infrastructure
@@ -513,6 +531,10 @@ export interface QuartzTransformerPluginInstance {
 
 ```typescript
 // quartz/plugins/test-helpers.ts
+
+import { VFile } from "vfile"
+import { PluginContext, QuartzVFileData } from "./plugin-context"
+import { FullSlug, FilePath } from "../util/path"
 
 export function createMockPluginContext(overrides?: Partial<PluginContext>): PluginContext {
   return {
@@ -535,6 +557,19 @@ export function createMockVFile(data?: Partial<QuartzVFileData>): VFile {
     ...data
   }
   return file
+}
+
+// Helper functions to be implemented
+function createMockConfig() {
+  // Implementation details...
+}
+
+function createMockArgv() {
+  // Implementation details...
+}
+
+function createMockUtilities() {
+  // Implementation details...
 }
 
 // Usage in tests:
@@ -922,7 +957,7 @@ All files in `quartz/components/` that import from `plugins/`
 - `quartz/processors/filter.ts`
 - `quartz/processors/emit.ts`
 
-**Total Estimated Files to Modify**: ~65 files
+**Total Estimated Files to Modify**: ~71 files
 
 ## Appendix B: References
 
