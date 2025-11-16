@@ -6,6 +6,14 @@ import { FilePath } from "../util/path"
 import { BuildCtx } from "../util/ctx"
 import { VFile } from "vfile"
 
+/**
+ * Plugin types use BuildCtx which provides readonly access to build context.
+ * Plugins can optionally import PluginContext from "./plugin-context" which
+ * extends BuildCtx with utility functions (ctx.utils).
+ *
+ * For new plugins, prefer using ctx.utils over direct imports from util/ modules.
+ */
+
 export interface PluginTypes {
   transformers: QuartzTransformerPluginInstance[]
   filters: QuartzFilterPluginInstance[]

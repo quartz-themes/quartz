@@ -32,6 +32,15 @@ const defaultOptions: Options = {
   externalLinkIcon: true,
 }
 
+/**
+ * @plugin CrawlLinks
+ * @category Transformer
+ *
+ * @reads vfile.data.slug
+ * @writes vfile.data.links
+ *
+ * @dependencies None
+ */
 export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {

@@ -52,12 +52,27 @@ function getAliasSlugs(aliases: string[]): FullSlug[] {
   return res
 }
 
+/**
+ * @plugin FrontMatter
+ * @category Transformer
+ *
+ * @reads None (processes raw frontmatter)
+ * @writes vfile.data.frontmatter
+ * @writes vfile.data.aliases
+ *
+ * @dependencies None
+ * @note This plugin temporarily mutates ctx.allSlugs for alias registration.
+ *       This should be refactored in the future to collect aliases separately.
+ */
 export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
     name: "FrontMatter",
     markdownPlugins(ctx) {
-      const { cfg, allSlugs } = ctx
+      const { cfg } = ctx
+      // Note: Temporarily casting allSlugs to mutable for backward compatibility
+      // This should be refactored in the future to collect aliases separately
+      const allSlugs = ctx.allSlugs as FullSlug[]
       return [
         [remarkFrontmatter, ["yaml", "toml"]],
         () => {

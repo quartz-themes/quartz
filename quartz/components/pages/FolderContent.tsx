@@ -30,7 +30,7 @@ export default ((opts?: Partial<FolderContentOptions>) => {
   const FolderContent: QuartzComponent = (props: QuartzComponentProps) => {
     const { tree, fileData, allFiles, cfg } = props
 
-    const trie = (props.ctx.trie ??= trieFromAllFiles(allFiles))
+    const trie = props.ctx.trie ?? trieFromAllFiles(allFiles)
     const folder = trie.findNode(fileData.slug!.split("/"))
     if (!folder) {
       return null

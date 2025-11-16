@@ -40,16 +40,15 @@ Content Files → Transformers → Filters → Emitters → Output Files
 - **Path utilities** (`util/path.ts`): Nearly all plugins import path manipulation functions
   - `slugifyFilePath`, `simplifySlug`, `transformLink`, `splitAnchor`, `pathToRoot`
   - Used in: all transformers, most emitters
-  
 - **Resource utilities** (`util/resources.tsx`): Emitters depend on resource management
   - `StaticResources`, `JSResource`, `CSSResource`
   - Used in: ComponentResources, all page emitters
-  
 - **BuildCtx** (`util/ctx.ts`): Shared context passed to all plugins
   - Contains: `argv`, `cfg`, `allSlugs`, `allFiles`, `buildId`, `incremental`
   - Provides global state access to all plugins
 
-**Impact**: 
+**Impact**:
+
 - Changes to utility functions require updates across many plugins
 - Hard to test plugins in isolation
 - Difficult to version or swap utility implementations
@@ -68,6 +67,7 @@ Content Files → Transformers → Filters → Emitters → Output Files
   - Breaking changes in one transformer can break dependent emitters/components
 
 **Impact**:
+
 - Cannot reorder or remove plugins without checking dependencies
 - Difficult to create alternative implementations
 - Hidden dependencies make refactoring risky
@@ -79,15 +79,14 @@ Content Files → Transformers → Filters → Emitters → Output Files
 - **Components depend on plugin data**:
   - `components/Date.tsx`, `components/PageList.tsx` import `QuartzPluginData`
   - `components/scripts/explorer.inline.ts` imports `ContentDetails` from `emitters/contentIndex`
-  
 - **Plugins depend on components**:
   - `emitters/componentResources.ts` imports component scripts and styles
   - `emitters/contentPage.tsx` imports layout components
-  
 - **Emitters construct component instances**:
   - `getQuartzComponents()` method creates tight coupling between emitters and components
 
 **Impact**:
+
 - Cannot change component interface without updating plugins
 - Cannot swap rendering engines easily
 - Component reusability is limited
@@ -97,6 +96,7 @@ Content Files → Transformers → Filters → Emitters → Output Files
 **Issue**: Plugins extend the `vfile` DataMap through module augmentation:
 
 Current approach (7 augmentations found):
+
 ```typescript
 declare module "vfile" {
   interface DataMap {
@@ -109,12 +109,14 @@ declare module "vfile" {
 ```
 
 **Problems**:
+
 - No central registry of available data properties
 - Type declarations scattered across plugin files
 - No validation that required data exists
 - Difficult to track data flow between plugins
 
 **Impact**:
+
 - Hard to understand what data is available at each stage
 - No compile-time guarantees about data presence
 - Plugin authors must read all transformer code to know available data
@@ -128,20 +130,22 @@ interface BuildCtx {
   buildId: string
   argv: Argv
   cfg: QuartzConfig
-  allSlugs: FullSlug[]  // Mutable array
-  allFiles: FilePath[]  // Mutable array
+  allSlugs: FullSlug[] // Mutable array
+  allFiles: FilePath[] // Mutable array
   trie?: FileTrieNode<BuildTimeTrieData>
   incremental: boolean
 }
 ```
 
 **Problems**:
+
 - Plugins can mutate `allSlugs` array (seen in FrontMatter plugin)
 - Side effects not clearly tracked
 - Difficult to parallelize plugin execution
 - Hard to test plugins without full BuildCtx
 
 **Impact**:
+
 - Race conditions in concurrent scenarios
 - Unpredictable plugin behavior
 - Testing requires complex mocking
@@ -256,17 +260,17 @@ export interface TransformerVFileData {
     // ... other frontmatter fields
   }
   aliases?: FullSlug[]
-  
+
   // From TableOfContents transformer
   toc?: TocEntry[]
   collapseToc?: boolean
-  
+
   // From CrawlLinks transformer
   links?: SimpleSlug[]
-  
+
   // From Description transformer
   description?: string
-  
+
   // Add other transformer data here
 }
 
@@ -289,6 +293,7 @@ declare module "vfile" {
 ```
 
 **Benefits**:
+
 - Single source of truth for vfile data structure
 - IDE autocomplete for available data
 - Easy to see what each plugin contributes
@@ -302,11 +307,11 @@ declare module "vfile" {
 /**
  * @plugin TableOfContents
  * @category Transformer
- * 
+ *
  * @reads vfile.data.frontmatter.enableToc
  * @writes vfile.data.toc
  * @writes vfile.data.collapseToc
- * 
+ *
  * @dependencies None
  */
 export const TableOfContents: QuartzTransformerPlugin = ...
@@ -336,14 +341,14 @@ export interface PluginUtilities {
     split: (slug: FullSlug) => [FullSlug, string]
     join: (...segments: string[]) => FilePath
   }
-  
+
   // Resource management
   resources: {
     createExternalJS: (src: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => JSResource
     createInlineJS: (script: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => JSResource
     createCSS: (resource: CSSResource) => CSSResource
   }
-  
+
   // Other utilities as needed
   escape: {
     html: (text: string) => string
@@ -355,17 +360,18 @@ export interface PluginContext {
   readonly config: QuartzConfig
   readonly buildId: string
   readonly argv: Readonly<Argv>
-  
+
   // Shared data (read-only for plugins)
   readonly allSlugs: ReadonlyArray<FullSlug>
   readonly allFiles: ReadonlyArray<FilePath>
-  
+
   // Utility functions
   utils: PluginUtilities
 }
 ```
 
 **Benefits**:
+
 - Plugins don't directly import util modules
 - Can mock utilities for testing
 - Can version utility interfaces separately
@@ -383,12 +389,14 @@ export const CrawlLinks: QuartzTransformerPlugin<Options> = (userOpts) => {
     htmlPlugins(ctx) {
       // New pattern (preferred)
       const simplify = ctx.utils?.path.simplify ?? simplifySlug
-      
+
       // Old pattern (still works)
       // import { simplifySlug } from "../../util/path"
-      
-      return [/* ... */]
-    }
+
+      return [
+        /* ... */
+      ]
+    },
   }
 }
 ```
@@ -423,16 +431,26 @@ import { FilePath } from "../util/path"
 
 export type QuartzEmitterPluginInstance = {
   name: string
-  emit: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources) => Promise<FilePath[]> | AsyncGenerator<FilePath>
-  partialEmit?: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources, changeEvents: ChangeEvent[]) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
+  emit: (
+    ctx: PluginContext,
+    content: ProcessedContent[],
+    resources: StaticResources,
+  ) => Promise<FilePath[]> | AsyncGenerator<FilePath>
+  partialEmit?: (
+    ctx: PluginContext,
+    content: ProcessedContent[],
+    resources: StaticResources,
+    changeEvents: ChangeEvent[],
+  ) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
   externalResources?: (ctx: PluginContext) => Partial<StaticResources> | undefined
-  
+
   // Instead of getQuartzComponents:
-  requiredComponents?: string[]  // Array of component names
+  requiredComponents?: string[] // Array of component names
 }
 ```
 
 **Benefits**:
+
 - Components defined once, referenced by name
 - Emitters don't construct component instances
 - Easier to swap component implementations
@@ -450,7 +468,9 @@ import calloutScript from "../../components/scripts/callout.inline"
 // New approach:
 // quartz/components/Callout.tsx
 const Callout: QuartzComponentConstructor = (opts) => {
-  const component: QuartzComponent = (props) => { /* ... */ }
+  const component: QuartzComponent = (props) => {
+    /* ... */
+  }
   component.afterDOMLoaded = calloutScript
   return component
 }
@@ -474,8 +494,8 @@ export interface BuildCtx {
   readonly buildId: string
   readonly argv: Readonly<Argv>
   readonly cfg: QuartzConfig
-  readonly allSlugs: ReadonlyArray<FullSlug>  // Changed from mutable array
-  readonly allFiles: ReadonlyArray<FilePath>  // Changed from mutable array
+  readonly allSlugs: ReadonlyArray<FullSlug> // Changed from mutable array
+  readonly allFiles: ReadonlyArray<FilePath> // Changed from mutable array
   readonly trie?: FileTrieNode<BuildTimeTrieData>
   readonly incremental: boolean
 }
@@ -493,7 +513,7 @@ const { parsedFiles, discoveredAliases } = parseResult
 // Update context immutably
 const updatedCtx = {
   ...ctx,
-  allSlugs: [...ctx.allSlugs, ...discoveredAliases]
+  allSlugs: [...ctx.allSlugs, ...discoveredAliases],
 }
 ```
 
@@ -506,13 +526,13 @@ const updatedCtx = {
 ```typescript
 export interface QuartzTransformerPluginInstance {
   name: string
-  
+
   // New: declare what this plugin will contribute
   init?: (ctx: PluginContext) => {
-    vfileDataKeys?: string[]  // What keys this plugin writes to vfile.data
-    aliases?: FullSlug[]       // Any aliases this plugin discovers
+    vfileDataKeys?: string[] // What keys this plugin writes to vfile.data
+    aliases?: FullSlug[] // Any aliases this plugin discovers
   }
-  
+
   textTransform?: (ctx: PluginContext, src: string) => string
   markdownPlugins?: (ctx: PluginContext) => PluggableList
   htmlPlugins?: (ctx: PluginContext) => PluggableList
@@ -521,6 +541,7 @@ export interface QuartzTransformerPluginInstance {
 ```
 
 **Benefits**:
+
 - Plugins declare their effects upfront via `init()` method
 - Build system can collect all aliases before processing
 - Runtime resources still provided via `externalResources()` method
@@ -552,7 +573,7 @@ export function createMockPluginContext(overrides?: Partial<PluginContext>): Plu
     allSlugs: [],
     allFiles: [],
     utils: createMockUtilities(),
-    ...overrides
+    ...overrides,
   }
 }
 
@@ -562,7 +583,7 @@ export function createMockVFile(data?: Partial<QuartzVFileData>): VFile {
     slug: "test" as FullSlug,
     filePath: "test.md" as FilePath,
     relativePath: "test.md" as FilePath,
-    ...data
+    ...data,
   }
   return file
 }
@@ -667,12 +688,12 @@ describe("TableOfContents", () => {
   it("should generate TOC from headings", () => {
     const ctx = createMockPluginContext()
     const file = createMockVFile({
-      frontmatter: { enableToc: true }
+      frontmatter: { enableToc: true },
     })
-    
+
     const plugin = TableOfContents()
     const [markdownPlugin] = plugin.markdownPlugins!(ctx)
-    
+
     // Test the plugin...
   })
 })
@@ -683,6 +704,7 @@ describe("TableOfContents", () => {
 ### 4.1 Phase 1: Foundation (Weeks 1-2)
 
 **Deliverables**:
+
 - [ ] Create `vfile-schema.ts` with centralized data definitions
 - [ ] Document existing plugins' data dependencies
 - [ ] Create plugin test helper utilities
@@ -693,6 +715,7 @@ describe("TableOfContents", () => {
 ### 4.2 Phase 2: Utility Abstraction (Weeks 3-4)
 
 **Deliverables**:
+
 - [ ] Create `plugin-context.ts` with PluginUtilities interface
 - [ ] Implement utility wrappers
 - [ ] Update BuildCtx to include utils
@@ -704,6 +727,7 @@ describe("TableOfContents", () => {
 ### 4.3 Phase 3: Component Decoupling (Weeks 5-7)
 
 **Deliverables**:
+
 - [ ] Create component registry system
 - [ ] Move component scripts from transformers to components
 - [ ] Update emitters to use component references instead of construction
@@ -715,6 +739,7 @@ describe("TableOfContents", () => {
 ### 4.4 Phase 4: Immutability & Safety (Weeks 8-9)
 
 **Deliverables**:
+
 - [ ] Make BuildCtx immutable
 - [ ] Refactor alias registration in FrontMatter
 - [ ] Update orchestration code to handle discovered aliases
@@ -725,8 +750,9 @@ describe("TableOfContents", () => {
 ### 4.5 Phase 5: Full Migration (Weeks 10-12)
 
 **Deliverables**:
+
 - [ ] Migrate all remaining transformers to new pattern
-- [ ] Migrate all filters to new pattern  
+- [ ] Migrate all filters to new pattern
 - [ ] Migrate all emitters to new pattern
 - [ ] Update all documentation
 - [ ] Add deprecation warnings for old patterns
@@ -736,6 +762,7 @@ describe("TableOfContents", () => {
 ### 4.6 Phase 6: Cleanup (Weeks 13-14)
 
 **Deliverables**:
+
 - [ ] Remove deprecated direct utility imports
 - [ ] Consolidate module augmentations
 - [ ] Performance benchmarks comparing before/after
@@ -748,12 +775,14 @@ describe("TableOfContents", () => {
 ### 5.1 VFile Data Access
 
 **Before**:
+
 ```typescript
 // Hope this exists and is the right type
 const toc = file.data.toc
 ```
 
 **After**:
+
 ```typescript
 import { QuartzVFileData, TocEntry } from "../vfile-schema"
 
@@ -764,6 +793,7 @@ const toc: TocEntry[] | undefined = file.data.toc
 ### 5.2 Utility Usage
 
 **Before**:
+
 ```typescript
 import { simplifySlug, transformLink } from "../../util/path"
 
@@ -772,6 +802,7 @@ const link = transformLink(file.data.slug!, dest, opts)
 ```
 
 **After**:
+
 ```typescript
 // No imports needed - use ctx.utils
 
@@ -782,6 +813,7 @@ const link = ctx.utils.path.transform(file.data.slug!, dest, opts)
 ### 5.3 Component Dependencies
 
 **Before**:
+
 ```typescript
 // In transformer plugin
 import calloutScript from "../../components/scripts/callout.inline"
@@ -789,12 +821,13 @@ import calloutScript from "../../components/scripts/callout.inline"
 export const MyTransformer: QuartzTransformerPlugin = () => ({
   name: "MyTransformer",
   externalResources: () => ({
-    js: [{ script: calloutScript, loadTime: "afterDOMReady", contentType: "inline" }]
-  })
+    js: [{ script: calloutScript, loadTime: "afterDOMReady", contentType: "inline" }],
+  }),
 })
 ```
 
 **After**:
+
 ```typescript
 // Transformer no longer imports component scripts
 export const MyTransformer: QuartzTransformerPlugin = () => ({
@@ -806,16 +839,17 @@ export const MyTransformer: QuartzTransformerPlugin = () => ({
 // Emitters declare which components they need via requiredComponents
 export const MyEmitter: QuartzEmitterPlugin = () => ({
   name: "MyEmitter",
-  requiredComponents: ["Callout"],  // Component system handles resources
+  requiredComponents: ["Callout"], // Component system handles resources
   async emit(ctx, content, resources) {
     // ...
-  }
+  },
 })
 ```
 
 ### 5.4 Data Declaration
 
 **Before**:
+
 ```typescript
 // At bottom of plugin file
 declare module "vfile" {
@@ -826,6 +860,7 @@ declare module "vfile" {
 ```
 
 **After**:
+
 ```typescript
 // In plugin file - export your custom type
 export interface MyDataType {
@@ -873,6 +908,7 @@ export const MyPlugin = ...
 **Risk**: Existing plugins and user configurations may break.
 
 **Mitigation**:
+
 - Maintain backward compatibility during transition
 - Provide deprecation warnings, not hard errors
 - Offer automatic migration script where possible
@@ -883,6 +919,7 @@ export const MyPlugin = ...
 **Risk**: Abstraction layers may slow down build process.
 
 **Mitigation**:
+
 - Benchmark before and after changes
 - Keep utility wrappers thin (inline where possible)
 - Profile hot paths
@@ -893,6 +930,7 @@ export const MyPlugin = ...
 **Risk**: Some plugins may not get migrated, leaving inconsistent codebase.
 
 **Mitigation**:
+
 - Start with high-value, frequently-used plugins
 - Set a timeline for migration completion
 - Make old patterns emit warnings in development mode
@@ -903,6 +941,7 @@ export const MyPlugin = ...
 **Risk**: Migration may introduce bugs not caught by tests.
 
 **Mitigation**:
+
 - Write tests before refactoring
 - Use existing build as integration test baseline
 - Test against real content repositories
@@ -916,7 +955,8 @@ export const MyPlugin = ...
 
 **Pros**: Could achieve ideal architecture immediately.
 
-**Cons**: 
+**Cons**:
+
 - Massive breaking change
 - All existing plugins would break
 - User configurations would need updates
@@ -931,6 +971,7 @@ export const MyPlugin = ...
 **Pros**: Simple, one import for plugins.
 
 **Cons**:
+
 - Tight coupling to monolithic class
 - Harder to test individual utilities
 - Namespace pollution
@@ -944,6 +985,7 @@ export const MyPlugin = ...
 **Pros**: Industry-standard pattern, very flexible.
 
 **Cons**:
+
 - Adds complexity and runtime overhead
 - Steep learning curve for plugin authors
 - Overkill for current needs
@@ -967,6 +1009,7 @@ export const MyPlugin = ...
 ### 10.1 Plugin Marketplace
 
 With decoupled plugins, could create:
+
 - NPM packages for individual plugins
 - Community plugin registry
 - Plugin dependency management
@@ -975,6 +1018,7 @@ With decoupled plugins, could create:
 ### 10.2 Plugin Performance Profiling
 
 With clear plugin boundaries:
+
 - Per-plugin performance metrics
 - Identify slow plugins
 - Optimize critical path
@@ -983,6 +1027,7 @@ With clear plugin boundaries:
 ### 10.3 Plugin Composition
 
 With standardized interfaces:
+
 - Higher-order plugins that compose others
 - Plugin pipelines
 - Conditional plugin chains
@@ -991,6 +1036,7 @@ With standardized interfaces:
 ### 10.4 Alternative Renderers
 
 With component decoupling:
+
 - Support React instead of Preact
 - Support Vue components
 - Support custom rendering engines
@@ -1013,11 +1059,13 @@ Success will be measured not just by code metrics, but by improved developer exp
 ## Appendix A: Affected Files
 
 ### Core Plugin System
+
 - `quartz/plugins/types.ts` - Plugin type definitions
 - `quartz/plugins/index.ts` - Plugin exports and utilities
 - `quartz/plugins/vfile.ts` - VFile type augmentations
 
 ### Transformers (13 files)
+
 - `quartz/plugins/transformers/citations.ts`
 - `quartz/plugins/transformers/description.ts`
 - `quartz/plugins/transformers/frontmatter.ts`
@@ -1033,10 +1081,12 @@ Success will be measured not just by code metrics, but by improved developer exp
 - `quartz/plugins/transformers/toc.ts`
 
 ### Filters (2 files)
+
 - `quartz/plugins/filters/draft.ts`
 - `quartz/plugins/filters/explicit.ts`
 
 ### Emitters (14 files)
+
 - `quartz/plugins/emitters/componentResources.ts`
 - `quartz/plugins/emitters/contentPage.tsx`
 - `quartz/plugins/emitters/tagPage.tsx`
@@ -1053,9 +1103,11 @@ Success will be measured not just by code metrics, but by improved developer exp
 - `quartz/plugins/emitters/index.ts`
 
 ### Components (~30 files)
+
 All files in `quartz/components/` that import from `plugins/`
 
 ### Utilities
+
 - `quartz/util/ctx.ts`
 - `quartz/util/path.ts`
 - `quartz/util/resources.tsx`
@@ -1063,6 +1115,7 @@ All files in `quartz/components/` that import from `plugins/`
 - `quartz/util/escape.ts`
 
 ### Build System
+
 - `quartz/build.ts`
 - `quartz/processors/parse.ts`
 - `quartz/processors/filter.ts`
