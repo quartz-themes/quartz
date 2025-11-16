@@ -48,8 +48,6 @@ export function getComponentJS(type: ComponentResourceType): JSResource | null {
         contentType: "inline",
         moduleType: "module",
       }
-    default:
-      return null
   }
 }
 
@@ -58,18 +56,23 @@ export function getComponentJS(type: ComponentResourceType): JSResource | null {
  */
 export function getComponentCSS(type: ComponentResourceType): CSSResource | null {
   switch (type) {
+    case "callout":
+    case "checkbox":
+      return null
     case "mermaid":
       return {
         content: mermaidStyle,
         inline: true,
       }
-    default:
-      return null
   }
 }
 
 /**
  * Get both JS and CSS resources for a component
+ *
+ * Note: This function is provided for convenience and future extensibility.
+ * Currently not used in the codebase as plugins call getComponentJS and
+ * getComponentCSS separately to handle conditional resource loading.
  */
 export function getComponentResources(type: ComponentResourceType): {
   js: JSResource | null

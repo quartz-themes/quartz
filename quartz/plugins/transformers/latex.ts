@@ -30,8 +30,7 @@ interface MacroType {
  *
  * @dependencies None
  *
- * @description Renders LaTeX math expressions using KaTeX, MathJax, or Typst.
- * Provides external CSS/JS resources for the selected rendering engine.
+ * @description Transforms markdown math notation (using remark-math) and renders LaTeX math expressions using KaTeX, MathJax, or Typst engines. Provides external CSS/JS resources for the selected rendering engine.
  */
 export const Latex: QuartzTransformerPlugin<Partial<Options>> = (opts) => {
   const engine = opts?.renderEngine ?? "katex"

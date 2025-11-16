@@ -145,7 +145,9 @@ const wikilinkImageEmbedRegex = new RegExp(
  * @plugin ObsidianFlavoredMarkdown
  * @category Transformer
  *
- * @reads vfile.data.frontmatter (for wikilink processing)
+ * @reads vfile.data.slug
+ * @reads vfile.data.frontmatter (for wikilink processing and tag extraction)
+ * @writes vfile.data.frontmatter.tags (when parseTags is enabled)
  * @writes vfile.data.blocks
  * @writes vfile.data.htmlAst
  * @writes vfile.data.hasMermaidDiagram
@@ -154,7 +156,7 @@ const wikilinkImageEmbedRegex = new RegExp(
  *
  * @description Processes Obsidian-flavored markdown including wikilinks, callouts,
  * highlights, comments, mermaid diagrams, checkboxes, and tables. Conditionally
- * loads component resources (callout, checkbox, mermaid) based on options.
+ * registers component resources (callout, checkbox, mermaid) only if the corresponding options are enabled.
  */
 export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
