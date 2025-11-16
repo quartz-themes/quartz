@@ -147,6 +147,9 @@ function createMockUtilities(): PluginUtilities {
     },
     escape: {
       html: (text: string) => text.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`),
+      // Note: This mock implementation mirrors the production code in util/escape.ts
+      // which has a known limitation of potential double-unescaping.
+      // This is acceptable as it matches the real implementation for testing purposes.
       unescape: (html: string) =>
         html
           .replace(/&amp;/g, "&")
