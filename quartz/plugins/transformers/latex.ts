@@ -21,6 +21,18 @@ interface MacroType {
   [key: string]: string
 }
 
+/**
+ * @plugin Latex
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (adds HTML but no vfile.data)
+ *
+ * @dependencies None
+ *
+ * @description Renders LaTeX math expressions using KaTeX, MathJax, or Typst.
+ * Provides external CSS/JS resources for the selected rendering engine.
+ */
 export const Latex: QuartzTransformerPlugin<Partial<Options>> = (opts) => {
   const engine = opts?.renderEngine ?? "katex"
   const macros = opts?.customMacros ?? {}

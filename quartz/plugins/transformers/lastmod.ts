@@ -38,6 +38,17 @@ function coerceDate(fp: string, d: any): Date {
 }
 
 type MaybeDate = undefined | string | number
+/**
+ * @plugin CreatedModifiedDate
+ * @category Transformer
+ *
+ * @reads vfile.data.frontmatter.created
+ * @reads vfile.data.frontmatter.modified
+ * @reads vfile.data.frontmatter.published
+ * @writes vfile.data.dates
+ *
+ * @dependencies None
+ */
 export const CreatedModifiedDate: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
