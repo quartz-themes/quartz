@@ -762,27 +762,17 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
       const css: CSSResource[] = []
 
       if (opts.enableCheckbox) {
-        const checkboxRes = getComponentJS("checkbox")
-        if (checkboxRes) {
-          js.push(checkboxRes)
-        }
+        js.push(getComponentJS("checkbox"))
       }
 
       if (opts.callouts) {
-        const calloutRes = getComponentJS("callout")
-        if (calloutRes) {
-          js.push(calloutRes)
-        }
+        js.push(getComponentJS("callout"))
       }
 
       if (opts.mermaid) {
-        const mermaidJSRes = getComponentJS("mermaid")
+        js.push(getComponentJS("mermaid"))
+
         const mermaidCSSRes = getComponentCSS("mermaid")
-
-        if (mermaidJSRes) {
-          js.push(mermaidJSRes)
-        }
-
         if (mermaidCSSRes) {
           css.push(mermaidCSSRes)
         }

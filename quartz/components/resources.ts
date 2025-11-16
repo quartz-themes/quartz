@@ -27,7 +27,7 @@ export type ComponentResourceType = "callout" | "checkbox" | "mermaid"
 /**
  * Get JavaScript resources for a specific component
  */
-export function getComponentJS(type: ComponentResourceType): JSResource | null {
+export function getComponentJS(type: ComponentResourceType): JSResource {
   switch (type) {
     case "callout":
       return {
@@ -79,7 +79,7 @@ export function getComponentCSS(type: ComponentResourceType): CSSResource | null
  * getComponentCSS separately to handle conditional resource loading.
  */
 export function getComponentResources(type: ComponentResourceType): {
-  js: JSResource | null
+  js: JSResource
   css: CSSResource | null
 } {
   return {
