@@ -11,9 +11,16 @@ import {
   pathToRoot,
   splitAnchor,
   joinSegments,
+  getAllSegmentPrefixes,
+  getFileExtension,
+  isAbsoluteURL,
+  isRelativeURL,
+  resolveRelative,
+  slugTag,
+  QUARTZ,
 } from "../util/path"
 import { JSResource, CSSResource } from "../util/resources"
-import { escapeHTML } from "../util/escape"
+import { escapeHTML, unescapeHTML } from "../util/escape"
 
 /**
  * Plugin utility interface providing abstraction over common utility functions
@@ -27,6 +34,13 @@ export interface PluginUtilities {
     toRoot: (slug: FullSlug) => RelativeURL
     split: (slug: FullSlug) => [FullSlug, string]
     join: (...segments: string[]) => FilePath
+    getAllSegmentPrefixes: (tags: string) => string[]
+    getFileExtension: (s: string) => string | undefined
+    isAbsoluteURL: (s: string) => boolean
+    isRelativeURL: (s: string) => boolean
+    resolveRelative: (current: FullSlug, target: FullSlug | SimpleSlug) => RelativeURL
+    slugTag: (tag: string) => string
+    QUARTZ: string
   }
 
   // Resource management
@@ -36,9 +50,10 @@ export interface PluginUtilities {
     createCSS: (resource: CSSResource) => CSSResource
   }
 
-  // Other utilities as needed
+  // HTML escape utilities
   escape: {
     html: (text: string) => string
+    unescape: (html: string) => string
   }
 }
 
@@ -64,6 +79,13 @@ export function createPluginUtilities(): PluginUtilities {
         return [path as FullSlug, anchor]
       },
       join: (...segments: string[]) => joinSegments(...segments) as FilePath,
+      getAllSegmentPrefixes,
+      getFileExtension,
+      isAbsoluteURL,
+      isRelativeURL,
+      resolveRelative,
+      slugTag,
+      QUARTZ,
     },
     resources: {
       createExternalJS: (
@@ -86,6 +108,7 @@ export function createPluginUtilities(): PluginUtilities {
     },
     escape: {
       html: escapeHTML,
+      unescape: unescapeHTML,
     },
   }
 }

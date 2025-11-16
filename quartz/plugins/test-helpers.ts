@@ -111,6 +111,21 @@ function createMockUtilities(): PluginUtilities {
       toRoot: (_slug: FullSlug) => "/" as RelativeURL,
       split: (slug: FullSlug) => [slug, ""],
       join: (...segments: string[]) => segments.join("/") as FilePath,
+      getAllSegmentPrefixes: (tags: string) => tags.split("/"),
+      getFileExtension: (s: string) => s.match(/\.[A-Za-z0-9]+$/)?.[0],
+      isAbsoluteURL: (s: string) => {
+        try {
+          new URL(s)
+          return true
+        } catch {
+          return false
+        }
+      },
+      isRelativeURL: (s: string) => /^\.{1,2}/.test(s),
+      resolveRelative: (_current: FullSlug, target: FullSlug | SimpleSlug) =>
+        target as unknown as RelativeURL,
+      slugTag: (tag: string) => tag.toLowerCase().replace(/\s+/g, "-"),
+      QUARTZ: "quartz",
     },
     resources: {
       createExternalJS: (src: string, loadTime?: "beforeDOMReady" | "afterDOMReady") => ({
@@ -127,6 +142,13 @@ function createMockUtilities(): PluginUtilities {
     },
     escape: {
       html: (text: string) => text.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`),
+      unescape: (html: string) =>
+        html
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'"),
     },
   }
 }
