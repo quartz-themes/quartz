@@ -229,7 +229,7 @@ export interface CoreVFileData {
 export interface TocEntry {
   depth: number
   text: string
-  slug: string // anchor slug (e.g., #some-heading)
+  slug: string // anchor slug (without "#" prefix, e.g., "some-heading")
 }
 
 /**
@@ -245,7 +245,14 @@ export interface TransformerVFileData {
     modified?: string
     published?: string
     description?: string
-    draft?: boolean
+    socialDescription?: string
+    publish?: boolean | string
+    draft?: boolean | string
+    lang?: string
+    enableToc?: string
+    cssclasses?: string[]
+    socialImage?: string
+    comments?: boolean | string
     // ... other frontmatter fields
   }
   aliases?: FullSlug[]
@@ -332,8 +339,8 @@ export interface PluginUtilities {
   
   // Resource management
   resources: {
-    createJS: (opts: JSResourceOptions) => JSResource
-    createCSS: (opts: CSSResourceOptions) => CSSResource
+    createJS: (resource: Omit<JSResource, 'loadTime' | 'contentType'> & Partial<Pick<JSResource, 'loadTime' | 'contentType'>>) => JSResource
+    createCSS: (resource: CSSResource) => CSSResource
   }
   
   // Other utilities as needed
@@ -418,6 +425,7 @@ export type QuartzEmitterPluginInstance = {
   name: string
   emit: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources) => Promise<FilePath[]> | AsyncGenerator<FilePath>
   partialEmit?: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources, changeEvents: ChangeEvent[]) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
+  externalResources?: (ctx: PluginContext) => Partial<StaticResources> | undefined
   
   // Instead of getQuartzComponents:
   requiredComponents?: string[]  // Array of component names
@@ -449,14 +457,9 @@ const Callout: QuartzComponentConstructor = (opts) => {
 
 export default Callout
 
-// Transformer just declares it needs the component:
-export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin = (opts) => {
-  return {
-    name: "ObsidianFlavoredMarkdown",
-    requiredComponents: ["Callout", "Checkbox", "Mermaid"],
-    // ... rest of plugin
-  }
-}
+// Note: Transformers don't need requiredComponents - this is only for emitters.
+// The transformer would just process the markdown, and the emitter would declare
+// which components are needed for rendering.
 ```
 
 ### 3.4 Phase 4: Remove BuildCtx Mutation
@@ -560,16 +563,52 @@ export function createMockVFile(data?: Partial<QuartzVFileData>): VFile {
 }
 
 // Helper functions to be implemented
-function createMockConfig() {
-  // Implementation details...
+function createMockConfig(): QuartzConfig {
+  return {
+    configuration: {
+      pageTitle: "Test Site",
+      baseUrl: "test.com",
+      locale: "en-US",
+      // Add other minimal config properties as needed
+    },
+    plugins: {
+      transformers: [],
+      filters: [],
+      emitters: [],
+    },
+  } as QuartzConfig
 }
 
-function createMockArgv() {
-  // Implementation details...
+function createMockArgv(): Argv {
+  return {
+    directory: "content",
+    verbose: false,
+    output: "public",
+    serve: false,
+    watch: false,
+    port: 8080,
+    wsPort: 3001,
+  }
 }
 
-function createMockUtilities() {
-  // Implementation details...
+function createMockUtilities(): PluginUtilities {
+  return {
+    path: {
+      slugify: (path: FilePath) => path as unknown as FullSlug,
+      simplify: (slug: FullSlug) => slug as unknown as SimpleSlug,
+      transform: (from: FullSlug, to: string, opts: TransformOptions) => to as RelativeURL,
+      toRoot: (slug: FullSlug) => "/" as RelativeURL,
+      split: (slug: FullSlug) => [slug, ""],
+      join: (...segments: string[]) => segments.join("/") as FilePath,
+    },
+    resources: {
+      createJS: (resource: any) => resource as JSResource,
+      createCSS: (resource: any) => resource as CSSResource,
+    },
+    escape: {
+      html: (text: string) => text.replace(/[&<>"']/g, (m) => `&#${m.charCodeAt(0)};`),
+    },
+  }
 }
 
 // Usage in tests:
@@ -693,10 +732,11 @@ const link = ctx.utils.path.transform(file.data.slug!, dest, opts)
 
 **Before**:
 ```typescript
+// In transformer plugin
 import calloutScript from "../../components/scripts/callout.inline"
 
-export const MyPlugin: QuartzTransformerPlugin = () => ({
-  name: "MyPlugin",
+export const MyTransformer: QuartzTransformerPlugin = () => ({
+  name: "MyTransformer",
   externalResources: () => ({
     js: [{ script: calloutScript, loadTime: "afterDOMReady", contentType: "inline" }]
   })
@@ -705,9 +745,20 @@ export const MyPlugin: QuartzTransformerPlugin = () => ({
 
 **After**:
 ```typescript
-export const MyPlugin: QuartzTransformerPlugin = () => ({
-  name: "MyPlugin",
+// Transformer no longer imports component scripts
+export const MyTransformer: QuartzTransformerPlugin = () => ({
+  name: "MyTransformer",
+  // Transformers just transform content, no component dependencies
+})
+
+// Component resources are declared in the component itself
+// Emitters declare which components they need via requiredComponents
+export const MyEmitter: QuartzEmitterPlugin = () => ({
+  name: "MyEmitter",
   requiredComponents: ["Callout"],  // Component system handles resources
+  async emit(ctx, content, resources) {
+    // ...
+  }
 })
 ```
 
@@ -725,12 +776,21 @@ declare module "vfile" {
 
 **After**:
 ```typescript
-// In vfile-schema.ts (centralized)
-export interface TransformerVFileData {
-  myData?: MyDataType
+// In plugin file - export your custom type
+export interface MyDataType {
+  someField: string
+  anotherField: number
 }
 
-// In plugin file
+// In vfile-schema.ts (centralized) - import and use the type
+import { MyDataType } from "../plugins/transformers/myPlugin"
+
+export interface TransformerVFileData {
+  myData?: MyDataType
+  // ... other fields
+}
+
+// In plugin file - document what you write
 /**
  * @writes vfile.data.myData
  */
