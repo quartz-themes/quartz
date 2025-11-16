@@ -2,6 +2,7 @@ import { QuartzConfig } from "../cfg"
 import { QuartzPluginData } from "../plugins/vfile"
 import { FileTrieNode } from "./fileTrie"
 import { FilePath, FullSlug } from "./path"
+import type { PluginUtilities } from "../plugins/plugin-context"
 
 export interface Argv {
   directory: string
@@ -29,6 +30,7 @@ export interface BuildCtx {
   readonly allFiles: ReadonlyArray<FilePath>
   readonly trie?: FileTrieNode<BuildTimeTrieData>
   readonly incremental: boolean
+  readonly utils?: PluginUtilities
 }
 
 /**
@@ -43,6 +45,7 @@ export interface MutableBuildCtx {
   allFiles: FilePath[]
   trie?: FileTrieNode<BuildTimeTrieData>
   incremental: boolean
+  utils?: PluginUtilities
 }
 
 export function trieFromAllFiles(allFiles: QuartzPluginData[]): FileTrieNode<BuildTimeTrieData> {

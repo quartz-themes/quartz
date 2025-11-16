@@ -21,6 +21,7 @@ import { getStaticResourcesFromPlugins } from "./plugins"
 import { randomIdNonSecure } from "./util/random"
 import { ChangeEvent } from "./plugins/types"
 import { minimatch } from "minimatch"
+import { createPluginUtilities } from "./plugins/plugin-context"
 
 type ContentMap = Map<
   FilePath,
@@ -50,6 +51,7 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
     allSlugs: [],
     allFiles: [],
     incremental: false,
+    utils: createPluginUtilities(),
   }
 
   const perf = new PerfTimer()

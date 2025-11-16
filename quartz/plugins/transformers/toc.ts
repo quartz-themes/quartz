@@ -25,6 +25,17 @@ interface TocEntry {
 }
 
 const slugAnchor = new Slugger()
+
+/**
+ * @plugin TableOfContents
+ * @category Transformer
+ *
+ * @reads vfile.data.frontmatter.enableToc
+ * @writes vfile.data.toc
+ * @writes vfile.data.collapseToc
+ *
+ * @dependencies None
+ */
 export const TableOfContents: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
