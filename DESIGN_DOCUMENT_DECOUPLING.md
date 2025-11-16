@@ -222,6 +222,15 @@ export interface CoreVFileData {
 }
 
 /**
+ * Table of Contents entry structure
+ */
+export interface TocEntry {
+  depth: number
+  text: string
+  slug: string // anchor slug (e.g., #some-heading)
+}
+
+/**
  * Data contributed by transformer plugins
  */
 export interface TransformerVFileData {
@@ -391,8 +400,8 @@ export interface ComponentRegistry {
 // quartz/plugins/types.ts
 export type QuartzEmitterPluginInstance = {
   name: string
-  emit: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources) => ...
-  partialEmit?: ...
+  emit: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources) => Promise<FilePath[]> | AsyncGenerator<FilePath>
+  partialEmit?: (ctx: PluginContext, content: ProcessedContent[], resources: StaticResources, changeEvents: ChangeEvent[]) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
   
   // Instead of getQuartzComponents:
   requiredComponents?: string[]  // Array of component names
@@ -487,6 +496,7 @@ export interface QuartzTransformerPluginInstance {
   textTransform?: (ctx: PluginContext, src: string) => string
   markdownPlugins?: (ctx: PluginContext) => PluggableList
   htmlPlugins?: (ctx: PluginContext) => PluggableList
+  externalResources?: (ctx: PluginContext) => Partial<StaticResources> | undefined
 }
 ```
 
@@ -861,16 +871,20 @@ Success will be measured not just by code metrics, but by improved developer exp
 - `quartz/plugins/index.ts` - Plugin exports and utilities
 - `quartz/plugins/vfile.ts` - VFile type augmentations
 
-### Transformers (9 files)
-- `quartz/plugins/transformers/frontmatter.ts`
-- `quartz/plugins/transformers/links.ts`
-- `quartz/plugins/transformers/toc.ts`
-- `quartz/plugins/transformers/ofm.ts`
+### Transformers (13 files)
+- `quartz/plugins/transformers/citations.ts`
 - `quartz/plugins/transformers/description.ts`
+- `quartz/plugins/transformers/frontmatter.ts`
+- `quartz/plugins/transformers/gfm.ts`
 - `quartz/plugins/transformers/lastmod.ts`
 - `quartz/plugins/transformers/latex.ts`
+- `quartz/plugins/transformers/linebreaks.ts`
+- `quartz/plugins/transformers/links.ts`
+- `quartz/plugins/transformers/ofm.ts`
+- `quartz/plugins/transformers/oxhugofm.ts`
+- `quartz/plugins/transformers/roam.ts`
 - `quartz/plugins/transformers/syntax.ts`
-- `quartz/plugins/transformers/citations.ts`
+- `quartz/plugins/transformers/toc.ts`
 
 ### Filters (2 files)
 - `quartz/plugins/filters/draft.ts`
