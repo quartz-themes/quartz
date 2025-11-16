@@ -34,7 +34,7 @@ export interface PluginUtilities {
     transform: (from: FullSlug, to: string, opts: TransformOptions) => RelativeURL
     toRoot: (slug: FullSlug) => RelativeURL
     split: (slug: string) => [string, string]
-    join: (...segments: string[]) => FilePath
+    join: (...segments: string[]) => string
     getAllSegmentPrefixes: (tags: string) => string[]
     getFileExtension: (s: string) => string | undefined
     isAbsoluteURL: (s: string) => boolean
@@ -80,7 +80,7 @@ export function createPluginUtilities(): PluginUtilities {
         const [path, anchor] = splitAnchor(slug)
         return [path, anchor]
       },
-      join: (...segments: string[]) => joinSegments(...segments) as FilePath,
+      join: (...segments: string[]) => joinSegments(...segments),
       getAllSegmentPrefixes,
       getFileExtension,
       isAbsoluteURL,

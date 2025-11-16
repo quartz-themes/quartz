@@ -147,7 +147,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
         })
       }
 
-      const fp = utils!.path.join("static", "contentIndex") as unknown as FullSlug
+      const fp = utils!.path.join("static", "contentIndex") as FullSlug
       const simplifiedIndex = Object.fromEntries(
         Array.from(linkIndex).map(([slug, content]) => {
           // remove description and from content index as nothing downstream

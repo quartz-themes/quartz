@@ -311,7 +311,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
           const buf = await res.arrayBuffer()
           yield write({
             ctx,
-            slug: ctx.utils!.path.join("static", "fonts", fontFile.filename) as unknown as FullSlug,
+            slug: ctx.utils!.path.join("static", "fonts", fontFile.filename) as FullSlug,
             ext: `.${fontFile.extension}`,
             content: Buffer.from(buf),
           })

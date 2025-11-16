@@ -72,17 +72,17 @@ async function processOgImage(
   fonts: SatoriOptions["fonts"],
   fullOptions: SocialImageOptions,
 ) {
-  const { cfg, utils } = ctx
+  const { utils } = ctx
+  const cfg = ctx.cfg.configuration
   const slug = fileData.slug!
-  const titleSuffix = cfg.configuration.pageTitleSuffix ?? ""
+  const titleSuffix = cfg.pageTitleSuffix ?? ""
   const title =
-    (fileData.frontmatter?.title ?? i18n(cfg.configuration.locale).propertyDefaults.title) +
-    titleSuffix
+    (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
   const description =
     fileData.frontmatter?.socialDescription ??
     fileData.frontmatter?.description ??
     utils!.escape.unescape(
-      fileData.description?.trim() ?? i18n(cfg.configuration.locale).propertyDefaults.description,
+      fileData.description?.trim() ?? i18n(cfg.locale).propertyDefaults.description,
     )
 
   const stream = await generateSocialImage(
@@ -90,7 +90,7 @@ async function processOgImage(
       title,
       description,
       fonts,
-      cfg: cfg.configuration,
+      cfg,
       fileData,
     },
     fullOptions,

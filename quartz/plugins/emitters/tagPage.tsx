@@ -42,7 +42,7 @@ function computeTagInfo(
       return [
         tag,
         defaultProcessedContent({
-          slug: utils.path.join("tags", tag) as unknown as FullSlug,
+          slug: utils.path.join("tags", tag) as FullSlug,
           frontmatter: { title, tags: [] },
         }),
       ]
@@ -75,7 +75,7 @@ async function processTagPage(
   resources: StaticResources,
 ) {
   const { utils } = ctx
-  const slug = utils!.path.join("tags", tag) as unknown as FullSlug
+  const slug = utils!.path.join("tags", tag) as FullSlug
   const [tree, file] = tagContent
   const cfg = ctx.cfg.configuration
   const externalResources = pageResources(utils!.path.toRoot(slug), resources)

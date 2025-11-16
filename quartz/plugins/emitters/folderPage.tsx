@@ -31,7 +31,7 @@ async function* processFolderInfo(
     SimpleSlug,
     ProcessedContent,
   ][]) {
-    const slug = utils!.path.join(folder, "index") as unknown as FullSlug
+    const slug = utils!.path.join(folder, "index") as FullSlug
     const [tree, file] = folderContent
     const cfg = ctx.cfg.configuration
     const externalResources = pageResources(utils!.path.toRoot(slug), resources)
@@ -66,7 +66,7 @@ function computeFolderInfo(
     [...folders].map((folder) => [
       folder,
       defaultProcessedContent({
-        slug: utils.path.join(folder, "index") as unknown as FullSlug,
+        slug: utils.path.join(folder, "index") as FullSlug,
         frontmatter: {
           title: `${i18n(locale).pages.folderContent.folder}: ${folder}`,
           tags: [],

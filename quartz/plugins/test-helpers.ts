@@ -113,7 +113,7 @@ function createMockUtilities(): PluginUtilities {
         const parts = slug.split("#", 2)
         return [parts[0], parts[1] || ""]
       },
-      join: (...segments: string[]) => segments.join("/") as FilePath,
+      join: (...segments: string[]) => segments.join("/"),
       getAllSegmentPrefixes: (tags: string) => tags.split("/"),
       getFileExtension: (s: string) => s.match(/\.[A-Za-z0-9]+$/)?.[0],
       isAbsoluteURL: (s: string) => {
