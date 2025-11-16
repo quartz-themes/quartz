@@ -9,7 +9,7 @@ import { parseMarkdown } from "./processors/parse"
 import { filterContent } from "./processors/filter"
 import { emitContent } from "./processors/emit"
 import cfg from "../quartz.config"
-import { FilePath, joinSegments, slugifyFilePath } from "./util/path"
+import { FilePath, FullSlug, joinSegments, slugifyFilePath } from "./util/path"
 import chokidar from "chokidar"
 import { ProcessedContent } from "./plugins/vfile"
 import { Argv, MutableBuildCtx } from "./util/ctx"
@@ -41,6 +41,16 @@ type BuildData = {
   contentMap: ContentMap
   changesSinceLastBuild: Record<FilePath, ChangeEvent["type"]>
   lastBuildMs: number
+}
+
+/**
+ * Collect all aliases from parsed content files.
+ * This is used to update ctx.allSlugs after parsing without mutating it during plugin execution.
+ */
+function collectAliases(parsedFiles: ProcessedContent[]): FullSlug[] {
+  return parsedFiles
+    .filter(([_, file]) => file.data.aliases)
+    .flatMap(([_, file]) => file.data.aliases!)
 }
 
 async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
@@ -84,6 +94,11 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
   ctx.allSlugs = allFiles.map((fp) => slugifyFilePath(fp as FilePath))
 
   const parsedFiles = await parseMarkdown(ctx, filePaths)
+  
+  // Collect aliases from parsed files and update context immutably
+  const discoveredAliases = collectAliases(parsedFiles)
+  ctx.allSlugs = [...new Set([...ctx.allSlugs, ...discoveredAliases])]
+  
   const filteredContent = filterContent(ctx, parsedFiles)
 
   await emitContent(ctx, filteredContent)
@@ -256,12 +271,16 @@ async function rebuild(changes: ChangeEvent[], clientRefresh: () => void, buildD
   // update allFiles and then allSlugs with the consistent view of content map
   ctx.allFiles = Array.from(contentMap.keys())
   ctx.allSlugs = ctx.allFiles.map((fp) => slugifyFilePath(fp as FilePath))
-  let processedFiles = filterContent(
-    ctx,
-    Array.from(contentMap.values())
-      .filter((file) => file.type === "markdown")
-      .map((file) => file.content),
-  )
+  
+  // Collect aliases from all markdown files before filtering for consistency
+  const allMarkdownFiles = Array.from(contentMap.values())
+    .filter((file) => file.type === "markdown")
+    .map((file) => file.content)
+
+  const discoveredAliases = collectAliases(allMarkdownFiles)
+  ctx.allSlugs = [...new Set([...ctx.allSlugs, ...discoveredAliases])]
+
+  let processedFiles = filterContent(ctx, allMarkdownFiles)
 
   let emittedFiles = 0
   for (const emitter of cfg.plugins.emitters) {
