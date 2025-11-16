@@ -6,20 +6,15 @@ import { pageResources, renderPage } from "../../components/renderPage"
 import { ProcessedContent, QuartzPluginData, defaultProcessedContent } from "../vfile"
 import { FullPageLayout } from "../../cfg"
 import path from "path"
-import {
-  FullSlug,
-  SimpleSlug,
-  stripSlashes,
-  joinSegments,
-  pathToRoot,
-  simplifySlug,
-} from "../../util/path"
+import { FullSlug, SimpleSlug } from "../../util/path"
 import { defaultListPageLayout, sharedPageComponents } from "../../../quartz.layout"
 import { FolderContent } from "../../components"
 import { write } from "./helpers"
 import { i18n, TRANSLATIONS } from "../../i18n"
 import { BuildCtx } from "../../util/ctx"
 import { StaticResources } from "../../util/resources"
+import { PluginUtilities } from "../plugin-context"
+
 interface FolderPageOptions extends FullPageLayout {
   sort?: (f1: QuartzPluginData, f2: QuartzPluginData) => number
 }
@@ -31,14 +26,15 @@ async function* processFolderInfo(
   opts: FullPageLayout,
   resources: StaticResources,
 ) {
+  const { utils } = ctx
   for (const [folder, folderContent] of Object.entries(folderInfo) as [
     SimpleSlug,
     ProcessedContent,
   ][]) {
-    const slug = joinSegments(folder, "index") as FullSlug
+    const slug = utils!.path.join(folder, "index") as unknown as FullSlug
     const [tree, file] = folderContent
     const cfg = ctx.cfg.configuration
-    const externalResources = pageResources(pathToRoot(slug), resources)
+    const externalResources = pageResources(utils!.path.toRoot(slug), resources)
     const componentData: QuartzComponentProps = {
       ctx,
       fileData: file.data,
@@ -63,13 +59,14 @@ function computeFolderInfo(
   folders: Set<SimpleSlug>,
   content: ProcessedContent[],
   locale: keyof typeof TRANSLATIONS,
+  utils: PluginUtilities,
 ): Record<SimpleSlug, ProcessedContent> {
   // Create default folder descriptions
   const folderInfo: Record<SimpleSlug, ProcessedContent> = Object.fromEntries(
     [...folders].map((folder) => [
       folder,
       defaultProcessedContent({
-        slug: joinSegments(folder, "index") as FullSlug,
+        slug: utils.path.join(folder, "index") as unknown as FullSlug,
         frontmatter: {
           title: `${i18n(locale).pages.folderContent.folder}: ${folder}`,
           tags: [],
@@ -80,7 +77,7 @@ function computeFolderInfo(
 
   // Update with actual content if available
   for (const [tree, file] of content) {
-    const slug = stripSlashes(simplifySlug(file.data.slug!)) as SimpleSlug
+    const slug = utils.path.stripSlashes(utils.path.simplify(file.data.slug!)) as SimpleSlug
     if (folders.has(slug)) {
       folderInfo[slug] = [tree, file]
     }
@@ -129,6 +126,7 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FolderPageOptions>> = (user
       ]
     },
     async *emit(ctx, content, resources) {
+      const { utils } = ctx
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
 
@@ -142,10 +140,11 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FolderPageOptions>> = (user
         }),
       )
 
-      const folderInfo = computeFolderInfo(folders, content, cfg.locale)
+      const folderInfo = computeFolderInfo(folders, content, cfg.locale, utils!)
       yield* processFolderInfo(ctx, folderInfo, allFiles, opts, resources)
     },
     async *partialEmit(ctx, content, resources, changeEvents) {
+      const { utils } = ctx
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
 
@@ -162,7 +161,7 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FolderPageOptions>> = (user
 
       // If there are affected folders, rebuild their pages
       if (affectedFolders.size > 0) {
-        const folderInfo = computeFolderInfo(affectedFolders, content, cfg.locale)
+        const folderInfo = computeFolderInfo(affectedFolders, content, cfg.locale, utils!)
         yield* processFolderInfo(ctx, folderInfo, allFiles, opts, resources)
       }
     },
