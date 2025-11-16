@@ -11,13 +11,14 @@ import { PluginContext, PluginUtilities } from "./plugin-context"
  */
 export function createMockPluginContext(overrides?: Partial<PluginContext>): PluginContext {
   return {
-    config: createMockConfig(),
+    cfg: createMockConfig(),
     buildId: "test-build",
     argv: createMockArgv(),
     allSlugs: [],
     allFiles: [],
     incremental: false,
     utils: createMockUtilities(),
+    trie: undefined,
     ...overrides,
   } as PluginContext
 }

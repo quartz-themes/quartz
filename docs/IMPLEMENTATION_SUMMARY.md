@@ -156,6 +156,30 @@ All changes are **100% backward compatible**:
 
 **Future Work:** Can be addressed in subsequent iterations if needed.
 
+## Known Technical Debt
+
+### FrontMatter Plugin Mutation
+
+**Issue:** The `FrontMatter` plugin temporarily casts `ctx.allSlugs` from readonly to mutable to register aliases (see `quartz/plugins/transformers/frontmatter.ts` lines 73-75).
+
+**Why:** This is a temporary backward compatibility measure. The proper solution requires refactoring how aliases are collected:
+
+1. Have the plugin return discovered aliases instead of mutating shared state
+2. Let the build orchestration layer merge them into the context immutably
+
+**Impact:** Type safety is bypassed but runtime behavior is correct. This is documented in the code with comments explaining it should be refactored.
+
+**Timeline:** Should be addressed in a future PR focused on alias handling refactoring.
+
+### Module Augmentation Pattern
+
+**Note:** Individual transformer plugins still have their own `declare module "vfile"` blocks alongside the centralized schema in `vfile-schema.ts`. This is **intentional, not duplication**:
+
+- TypeScript merges all module augmentation declarations
+- Centralized schema documents built-in plugin data
+- Individual declarations allow custom/third-party plugins to extend the DataMap
+- This design supports extensibility while maintaining a central reference
+
 ## Testing & Validation
 
 ### ✅ Type Checking

@@ -16,6 +16,8 @@ export interface Argv {
   concurrency?: number
 }
 
+export type ReadonlyArgv = Readonly<Argv>
+
 export type BuildTimeTrieData = QuartzPluginData & {
   slug: string
   title: string
@@ -24,7 +26,7 @@ export type BuildTimeTrieData = QuartzPluginData & {
 
 export interface BuildCtx {
   readonly buildId: string
-  readonly argv: Readonly<Argv>
+  readonly argv: ReadonlyArgv
   readonly cfg: QuartzConfig
   readonly allSlugs: ReadonlyArray<FullSlug>
   readonly allFiles: ReadonlyArray<FilePath>

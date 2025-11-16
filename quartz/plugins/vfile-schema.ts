@@ -1,4 +1,6 @@
 import { FullSlug, FilePath, SimpleSlug } from "../util/path"
+import type { Element } from "hast"
+import type { Root as HtmlRoot } from "hast"
 
 /**
  * Core data set by the processing pipeline before any plugins
@@ -54,6 +56,7 @@ export interface TransformerVFileData {
 
   // From Description transformer
   description?: string
+  text?: string
 
   // From LastMod transformer
   dates?: {
@@ -64,6 +67,11 @@ export interface TransformerVFileData {
 
   // From Citations transformer
   citations?: unknown[]
+
+  // From ObsidianFlavoredMarkdown transformer
+  blocks?: Record<string, Element>
+  htmlAst?: HtmlRoot
+  hasMermaidDiagram?: boolean
 
   // From Latex transformer
   // (adds external resources but no data to vfile)
@@ -85,6 +93,18 @@ export interface EmitterVFileData {
  */
 export interface QuartzVFileData extends CoreVFileData, TransformerVFileData, EmitterVFileData {}
 
+/**
+ * TypeScript module augmentation for vfile.
+ *
+ * Note: Individual transformer plugins also have their own `declare module "vfile"`
+ * blocks. This is intentional and not a duplication issue. TypeScript merges all
+ * module augmentation declarations, allowing:
+ * 1. Built-in plugins to have their types centralized here for documentation
+ * 2. Custom/third-party plugins to extend the DataMap with their own fields
+ *
+ * This design supports plugin extensibility while maintaining a central schema
+ * for built-in plugin data.
+ */
 declare module "vfile" {
   interface DataMap extends QuartzVFileData {}
 }
