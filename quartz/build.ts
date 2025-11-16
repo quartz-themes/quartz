@@ -48,13 +48,9 @@ type BuildData = {
  * This is used to update ctx.allSlugs after parsing without mutating it during plugin execution.
  */
 function collectAliases(parsedFiles: ProcessedContent[]): FullSlug[] {
-  const aliases: FullSlug[] = []
-  for (const [_, file] of parsedFiles) {
-    if (file.data.aliases) {
-      aliases.push(...file.data.aliases)
-    }
-  }
-  return aliases
+  return parsedFiles
+    .filter(([_, file]) => file.data.aliases)
+    .flatMap(([_, file]) => file.data.aliases!)
 }
 
 async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
