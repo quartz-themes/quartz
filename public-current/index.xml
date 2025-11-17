@@ -6,24 +6,6 @@
       <description>Last 10 notes on Quartz 4</description>
       <generator>Quartz -- quartz.jzhao.xyz</generator>
       <item>
-    <title>IMPLEMENTATION_SUMMARY</title>
-    <link>https://quartz.jzhao.xyz/IMPLEMENTATION_SUMMARY</link>
-    <guid>https://quartz.jzhao.xyz/IMPLEMENTATION_SUMMARY</guid>
-    <description><![CDATA[ Plugin Decoupling Implementation Summary Overview This implementation successfully delivers Phases 1-5 of the plugin decoupling strategy outlined in DESIGN_DOCUMENT_DECOUPLING.md, establishing a solid foundation for better modularity, maintainability, and extensibility of the Quartz plugin system. ]]></description>
-    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
-  </item><item>
-    <title>PLUGIN_MIGRATION</title>
-    <link>https://quartz.jzhao.xyz/PLUGIN_MIGRATION</link>
-    <guid>https://quartz.jzhao.xyz/PLUGIN_MIGRATION</guid>
-    <description><![CDATA[ Plugin Decoupling Migration Guide This guide helps plugin authors migrate to the new decoupled plugin architecture introduced by the plugin decoupling strategy. ]]></description>
-    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
-  </item><item>
-    <title>SECURITY_SUMMARY</title>
-    <link>https://quartz.jzhao.xyz/SECURITY_SUMMARY</link>
-    <guid>https://quartz.jzhao.xyz/SECURITY_SUMMARY</guid>
-    <description><![CDATA[ Plugin Decoupling Implementation - Security Summary Security Scan Results Date: 2025-11-16 Scanner: CodeQL Result: ✅ PASSED - No vulnerabilities detected Analysis Details Language: JavaScript/TypeScript Alerts Found: 0 Severity Levels: Critical: 0 High: 0 Medium: 0 Low: 0 Implementation Security Rev... ]]></description>
-    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
-  </item><item>
     <title>Architecture</title>
     <link>https://quartz.jzhao.xyz/advanced/architecture</link>
     <guid>https://quartz.jzhao.xyz/advanced/architecture</guid>
@@ -64,6 +46,24 @@
     <link>https://quartz.jzhao.xyz/build</link>
     <guid>https://quartz.jzhao.xyz/build</guid>
     <description><![CDATA[ Once you’ve initialized Quartz, let’s see what it looks like locally: npx quartz build --serve This will start a local web server to run your Quartz on your computer. ]]></description>
+    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
+  </item><item>
+    <title>Configuration</title>
+    <link>https://quartz.jzhao.xyz/configuration</link>
+    <guid>https://quartz.jzhao.xyz/configuration</guid>
+    <description><![CDATA[ Quartz is meant to be extremely configurable, even if you don’t know any coding. ]]></description>
+    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
+  </item><item>
+    <title>Citations</title>
+    <link>https://quartz.jzhao.xyz/features/Citations</link>
+    <guid>https://quartz.jzhao.xyz/features/Citations</guid>
+    <description><![CDATA[ Quartz uses rehype-citation to support parsing of a BibTex bibliography file. ]]></description>
+    <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
+  </item><item>
+    <title>Docker Support</title>
+    <link>https://quartz.jzhao.xyz/features/Docker-Support</link>
+    <guid>https://quartz.jzhao.xyz/features/Docker-Support</guid>
+    <description><![CDATA[ Quartz comes shipped with a Docker image that will allow you to preview your Quartz locally without installing Node. ]]></description>
     <pubDate>Sun, 16 Nov 2025 22:44:20 GMT</pubDate>
   </item>
     </channel>
