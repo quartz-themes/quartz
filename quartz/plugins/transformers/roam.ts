@@ -29,15 +29,6 @@ const defaultOptions: Options = {
   attributeComponent: true,
 }
 
-/**
- * @plugin RoamFlavoredMarkdown
- * @category Transformer
- *
- * @reads None
- * @writes None (transforms Roam Research specific syntax)
- *
- * @dependencies None
- */
 const orRegex = new RegExp(/{{or:(.*?)}}/, "g")
 const TODORegex = new RegExp(/{{.*?\bTODO\b.*?}}/, "g")
 const DONERegex = new RegExp(/{{.*?\bDONE\b.*?}}/, "g")
@@ -120,6 +111,15 @@ function transformSpecialEmbed(node: Paragraph, opts: Options): Html | null {
   }
 }
 
+/**
+ * @plugin RoamFlavoredMarkdown
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (transforms Roam Research specific syntax)
+ *
+ * @dependencies None
+ */
 export const RoamFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options> | undefined> = (
   userOpts,
 ) => {
