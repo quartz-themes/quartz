@@ -19,6 +19,15 @@ const defaultOptions: Options = {
   keepBackground: false,
 }
 
+/**
+ * @plugin SyntaxHighlighting
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (adds syntax highlighting to code blocks)
+ *
+ * @dependencies None
+ */
 export const SyntaxHighlighting: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts: CodeOptions = { ...defaultOptions, ...userOpts }
 

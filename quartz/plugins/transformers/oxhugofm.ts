@@ -44,11 +44,19 @@ const blockLatexRegex = new RegExp(
 const quartzLatexRegex = new RegExp(/\$\$[\s\S]*?\$\$|\$.*?\$/, "g")
 
 /**
+ * @plugin OxHugoFlavouredMarkdown
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (transforms ox-hugo markdown to Quartz-compatible format)
+ *
+ * @dependencies None
+ *
  * ox-hugo is an org exporter backend that exports org files to hugo-compatible
  * markdown in an opinionated way. This plugin adds some tweaks to the generated
  * markdown to make it compatible with quartz but the list of changes applied it
  * is not exhaustive.
- * */
+ */
 export const OxHugoFlavouredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {

@@ -111,6 +111,15 @@ function transformSpecialEmbed(node: Paragraph, opts: Options): Html | null {
   }
 }
 
+/**
+ * @plugin RoamFlavoredMarkdown
+ * @category Transformer
+ *
+ * @reads None
+ * @writes None (transforms Roam Research specific syntax)
+ *
+ * @dependencies None
+ */
 export const RoamFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options> | undefined> = (
   userOpts,
 ) => {
