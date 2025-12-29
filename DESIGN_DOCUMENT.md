@@ -147,7 +147,7 @@ CLI (`quartz/bootstrap-cli.mjs`):
 export interface PluginManifest {
   name: string
   version: string                    // semver (e.g., "1.2.3")
-  apiVersion: string                 // Quartz plugin API version constraint (e.g., "^5.0" or "5.0")
+  apiVersion: string                 // Quartz plugin API version requirement (semver range like "^5.0" or exact version like "5.0.0")
   capabilities?: string[]            // Optional capabilities (e.g., "incremental", "streaming")
   dependencies?: Record<string, string> // Plugin dependencies with version constraints
 }
@@ -414,7 +414,7 @@ export interface Lockfile {
   plugins: {
     [name: string]: {
       version: string                // Resolved plugin version
-      resolved: string               // Resolution source URL or identifier (npm registry URL, git URL, or local path)
+      resolved: string               // Resolution source (e.g., "https://registry.npmjs.org/@quartz/plugin-canvas/-/plugin-canvas-1.0.0.tgz", "git+https://github.com/user/plugin.git#abc123", or "file:./local-plugins/my-plugin")
       integrity?: string             // Package integrity hash
       dependencies?: Record<string, string>
     }
