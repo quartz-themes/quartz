@@ -146,8 +146,8 @@ CLI (`quartz/bootstrap-cli.mjs`):
 ```typescript
 export interface PluginManifest {
   name: string
-  version: string                    // semver
-  apiVersion: string                 // Quartz plugin API version (e.g., "5.0")
+  version: string                    // semver (e.g., "1.2.3")
+  apiVersion: string                 // Quartz plugin API version constraint (e.g., "^5.0" or "5.0")
   capabilities?: string[]            // Optional capabilities (e.g., "incremental", "streaming")
   dependencies?: Record<string, string> // Plugin dependencies with version constraints
 }
@@ -171,7 +171,6 @@ Loaders handle non-Markdown input formats:
 
 ```typescript
 export interface QuartzLoaderPluginInstance extends PluginManifest {
-  name: string
   supportedExtensions: string[]      // e.g., [".canvas", ".md", ".mdx"]
   
   // Load file and convert to intermediate representation
@@ -415,7 +414,7 @@ export interface Lockfile {
   plugins: {
     [name: string]: {
       version: string                // Resolved plugin version
-      resolved: string               // Resolution source (npm, git, local)
+      resolved: string               // Resolution source URL or identifier (npm registry URL, git URL, or local path)
       integrity?: string             // Package integrity hash
       dependencies?: Record<string, string>
     }
@@ -582,7 +581,6 @@ All emitters should support partial emits:
 
 ```typescript
 export interface QuartzEmitterPluginInstance extends PluginManifest {
-  name: string
   emit: (ctx: BuildCtx, content: ProcessedContentV5[], resources: StaticResources) 
     => Promise<FilePath[]> | AsyncGenerator<FilePath>
   
@@ -981,7 +979,6 @@ export type QuartzComponent = ComponentType<QuartzComponentProps> & {
 ```typescript
 // Loader plugin (NEW)
 export interface QuartzLoaderPluginInstance extends PluginManifest {
-  name: string
   supportedExtensions: string[]
   load: (ctx: BuildCtx, file: VFile) => Promise<LoadedContent>
   extractLinks?: (ctx: BuildCtx, content: LoadedContent) => Link[]
