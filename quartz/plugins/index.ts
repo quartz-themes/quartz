@@ -50,6 +50,7 @@ export * as Loaders from "./loaders"  // v5: Export loaders
 // v5: Export manifest and loader types
 export * from "./manifest"
 export * from "./loader"
+export * from "./data-model"  // v5: Enhanced data model
 
 declare module "vfile" {
   // inserted in processors.ts

@@ -83,7 +83,37 @@ export interface GlobalConfiguration {
    * Region Codes: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
    */
   locale: ValidLocale
+  
+  /** v5: Resource management options */
+  resources?: ResourceOptions
 }
+
+/**
+ * v5: Resource management options
+ */
+export interface ResourceOptions {
+  /** Enable CDN for resources (opt-in, disabled by default) */
+  cdnCaching?: boolean
+  
+  /** Allowlist for external resources */
+  allowedDomains?: string[]
+  
+  /** Google Fonts integration */
+  googleFonts?: {
+    enabled: boolean
+    families: string[]
+  }
+  
+  /** Minify CSS/JS resources */
+  minify?: boolean
+  
+  /** Resource bundling strategy */
+  bundling?: "inline" | "external" | "auto"
+  
+  /** Generate SRI hashes for security */
+  integrity?: boolean
+}
+
 
 export interface QuartzConfig {
   configuration: GlobalConfiguration
