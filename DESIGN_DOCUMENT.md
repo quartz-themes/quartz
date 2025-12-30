@@ -16,6 +16,7 @@ Quartz v5 is a purely static, plugin-first evolution of the current v4 architect
 ## Goals and Non-Goals
 
 ### Goals
+
 - Stable, versioned plugin API surfaces building on the current QuartzTransformerPlugin, QuartzFilterPlugin, and QuartzEmitterPlugin interfaces
 - Pluggable loaders/transformers/filters/emitters/layouts/themes extending the existing plugin architecture
 - Static-only output with optional client-side progressive enhancement (maintaining current SPA routing and component hydration)
@@ -26,6 +27,7 @@ Quartz v5 is a purely static, plugin-first evolution of the current v4 architect
 - Backward compatibility for current Quartz v4 sites
 
 ### Non-Goals
+
 - No server-side rendering at request time (maintaining the current static generation approach)
 - No runtime servers for published sites (preserving the current static hosting model)
 - No full Obsidian feature parity in v1; begin with a pragmatic subset
@@ -58,15 +60,18 @@ Quartz v4 uses a three-phase build pipeline:
 ### Current Plugin System
 
 **Transformers** (`QuartzTransformerPluginInstance`):
+
 - `textTransform?`: string → string transformations
 - `markdownPlugins?`: returns unified plugins for mdast processing
 - `htmlPlugins?`: returns unified plugins for hast processing
 - `externalResources?`: contributes CSS/JS resources
 
 **Filters** (`QuartzFilterPluginInstance`):
+
 - `shouldPublish()`: determines if content should be published
 
 **Emitters** (`QuartzEmitterPluginInstance`):
+
 - `emit()`: generates output files from processed content
 - `partialEmit?()`: optional incremental rebuild support
 - `getQuartzComponents?()`: returns components used for resource optimization
@@ -78,18 +83,20 @@ Components are Preact components with static resource declarations:
 
 ```typescript
 export type QuartzComponent = ComponentType<QuartzComponentProps> & {
-  css?: StringResource           // CSS files/inline styles
-  beforeDOMLoaded?: StringResource  // Scripts to run before DOM ready
-  afterDOMLoaded?: StringResource   // Scripts to run after DOM ready
+  css?: StringResource // CSS files/inline styles
+  beforeDOMLoaded?: StringResource // Scripts to run before DOM ready
+  afterDOMLoaded?: StringResource // Scripts to run after DOM ready
 }
 ```
 
 Layouts are assembled from components defined in `quartz.layout.ts`:
+
 - `SharedLayout`: head, header, footer, afterBody (shared across all pages)
 - `PageLayout`: beforeBody, left, right (page-specific sections)
 - `FullPageLayout`: combines SharedLayout + PageLayout + pageBody
 
 The rendering pipeline (`quartz/components/renderPage.tsx`):
+
 1. Gathers component resources (CSS/JS) from all components in use
 2. Converts hast → JSX via hast-util-to-jsx-runtime
 3. Assembles the full page with components in layout slots
@@ -103,9 +110,9 @@ Resources are managed through `StaticResources`:
 
 ```typescript
 export interface StaticResources {
-  css: CSSResource[]              // Stylesheets (inline or linked)
-  js: JSResource[]                // Scripts (inline or external)
-  additionalHead: JSX.Element[]   // Additional head elements
+  css: CSSResource[] // Stylesheets (inline or linked)
+  js: JSResource[] // Scripts (inline or external)
+  additionalHead: JSX.Element[] // Additional head elements
 }
 ```
 
@@ -128,6 +135,7 @@ The build process (`quartz/build.ts`):
 7. Incremental rebuilds: track content map, partial emits
 
 CLI (`quartz/bootstrap-cli.mjs`):
+
 - Commands: create, update, restore, sync, build
 - Uses esbuild to transpile TypeScript on-the-fly
 - Bundles with cache busting for hot reload
@@ -146,9 +154,9 @@ CLI (`quartz/bootstrap-cli.mjs`):
 ```typescript
 export interface PluginManifest {
   name: string
-  version: string                    // semver (e.g., "1.2.3")
-  apiVersion: string                 // Quartz plugin API version requirement (semver range like "^5.0" or exact version like "5.0.0")
-  capabilities?: string[]            // Optional capabilities (e.g., "incremental", "streaming")
+  version: string // semver (e.g., "1.2.3")
+  apiVersion: string // Quartz plugin API version requirement (semver range like "^5.0" or exact version like "5.0.0")
+  capabilities?: string[] // Optional capabilities (e.g., "incremental", "streaming")
   dependencies?: Record<string, string> // Plugin dependencies with version constraints
 }
 
@@ -171,38 +179,38 @@ Loaders handle non-Markdown input formats:
 
 ```typescript
 export interface QuartzLoaderPluginInstance extends PluginManifest {
-  supportedExtensions: string[]      // e.g., [".canvas", ".md", ".mdx"]
-  
+  supportedExtensions: string[] // e.g., [".canvas", ".md", ".mdx"]
+
   // Load file and convert to intermediate representation
   load: (ctx: BuildCtx, file: VFile) => Promise<LoadedContent>
-  
+
   // Optional: extract links for graph building
   extractLinks?: (ctx: BuildCtx, content: LoadedContent) => Link[]
-  
+
   // Optional: contribute resources
   externalResources?: ExternalResourcesFn
 }
 
 export type LoadedContent = {
   kind: ContentKind
-  data: unknown  // Loader-specific data structure
+  data: unknown // Loader-specific data structure
   frontmatter?: Frontmatter
   slug?: FullSlug
 }
 
-export type ContentKind = 
-  | "markdown"      // Standard Markdown → mdast pipeline
-  | "canvas"        // Obsidian Canvas → custom AST
-  | "database"      // Obsidian Database → structured data
-  | "asset"         // Images, PDFs, etc.
-  | "custom"        // Plugin-defined content types
+export type ContentKind =
+  | "markdown" // Standard Markdown → mdast pipeline
+  | "canvas" // Obsidian Canvas → custom AST
+  | "database" // Obsidian Database → structured data
+  | "asset" // Images, PDFs, etc.
+  | "custom" // Plugin-defined content types
 ```
 
 **Enhanced Configuration with Loaders**
 
 ```typescript
 export interface PluginTypes {
-  loaders: QuartzLoaderPluginInstance[]      // NEW: content loaders
+  loaders: QuartzLoaderPluginInstance[] // NEW: content loaders
   transformers: QuartzTransformerPluginInstance[]
   filters: QuartzFilterPluginInstance[]
   emitters: QuartzEmitterPluginInstance[]
@@ -215,26 +223,26 @@ export interface PluginTypes {
 
 ```typescript
 export interface PageMeta {
-  id: PageId                         // Unique content-addressable ID
-  slug: FullSlug                     // URL slug
-  filePath: FilePath                 // Source-relative path
-  outPath: string                    // Output-relative path (e.g., foo/index.html)
-  title?: string                     // Page title
-  tags: string[]                     // Tags
-  created?: Date                     // Creation date
-  updated?: Date                     // Last modified date
-  draft?: boolean                    // Draft status
-  publish?: boolean                  // Publish status
-  contentKind: ContentKind           // Content type
-  layoutId?: string                  // Selected layout
+  id: PageId // Unique content-addressable ID
+  slug: FullSlug // URL slug
+  filePath: FilePath // Source-relative path
+  outPath: string // Output-relative path (e.g., foo/index.html)
+  title?: string // Page title
+  tags: string[] // Tags
+  created?: Date // Creation date
+  updated?: Date // Last modified date
+  draft?: boolean // Draft status
+  publish?: boolean // Publish status
+  contentKind: ContentKind // Content type
+  layoutId?: string // Selected layout
 }
 
 export interface Links {
   outgoing: Array<{
     target: PageId | FullSlug
-    type: LinkType                   // "wiki", "markdown", "url", etc.
-    text?: string                    // Link text
-    meta?: unknown                   // Link-specific metadata
+    type: LinkType // "wiki", "markdown", "url", etc.
+    text?: string // Link text
+    meta?: unknown // Link-specific metadata
   }>
   incoming: Array<{
     source: PageId | FullSlug
@@ -247,20 +255,20 @@ export interface Links {
 export interface ProcessedContentV5 {
   meta: PageMeta
   frontmatter: Frontmatter
-  
+
   // AST representations (populated based on contentKind)
-  mdast?: MdRoot                     // For markdown content
-  hast?: HtmlRoot                    // For markdown content
-  canvasAst?: CanvasNode             // For canvas content
-  databaseAst?: DatabaseNode         // For database content
-  
-  html?: string                      // Rendered HTML (content slot)
-  links: Links                       // Link graph
-  assets?: EmittedAssetRef[]         // Associated assets
-  data?: Record<string, unknown>     // Plugin-specific data
-  
+  mdast?: MdRoot // For markdown content
+  hast?: HtmlRoot // For markdown content
+  canvasAst?: CanvasNode // For canvas content
+  databaseAst?: DatabaseNode // For database content
+
+  html?: string // Rendered HTML (content slot)
+  links: Links // Link graph
+  assets?: EmittedAssetRef[] // Associated assets
+  data?: Record<string, unknown> // Plugin-specific data
+
   // v4 compatibility
-  vfile: VFile                       // Original vfile for compatibility
+  vfile: VFile // Original vfile for compatibility
 }
 ```
 
@@ -268,12 +276,12 @@ export interface ProcessedContentV5 {
 
 ```typescript
 export interface EmittedAssetRef {
-  id: string                         // Unique asset ID
-  relPath: string                    // Output-relative path
+  id: string // Unique asset ID
+  relPath: string // Output-relative path
   type: AssetType
-  integrity?: string                 // SRI hash
-  size?: number                      // File size in bytes
-  hash?: string                      // Content hash for cache busting
+  integrity?: string // SRI hash
+  size?: number // File size in bytes
+  hash?: string // Content hash for cache busting
 }
 
 export type AssetType = "css" | "js" | "font" | "image" | "wasm" | "other"
@@ -290,13 +298,13 @@ export interface ResourceRegistry {
   registerJS(resource: JSResource): void
   registerAsset(asset: EmittedAssetRef): void
   registerHeadElement(element: JSX.Element | ((data: QuartzPluginData) => JSX.Element)): void
-  
+
   // Query resources
   getCSS(): CSSResource[]
   getJS(): JSResource[]
   getAssets(): EmittedAssetRef[]
   getHeadElements(): (JSX.Element | ((data: QuartzPluginData) => JSX.Element))[]
-  
+
   // Resource deduplication and optimization
   deduplicate(): void
   optimize(): void
@@ -304,26 +312,23 @@ export interface ResourceRegistry {
 
 // Enhanced resource types
 export type CSSResource = {
-  content: string                    // URL or inline content
-  inline?: boolean                   // Inline vs linked
-  spaPreserve?: boolean              // Preserve across SPA navigation
-  media?: string                     // Media query
-  integrity?: string                 // SRI hash
-  priority?: "critical" | "normal" | "lazy"  // Load priority
+  content: string // URL or inline content
+  inline?: boolean // Inline vs linked
+  spaPreserve?: boolean // Preserve across SPA navigation
+  media?: string // Media query
+  integrity?: string // SRI hash
+  priority?: "critical" | "normal" | "lazy" // Load priority
 }
 
 export type JSResource = {
   loadTime: "beforeDOMReady" | "afterDOMReady"
   moduleType?: "module" | "nomodule"
   spaPreserve?: boolean
-  integrity?: string                 // SRI hash
+  integrity?: string // SRI hash
   priority?: "critical" | "normal" | "lazy"
   defer?: boolean
   async?: boolean
-} & (
-  | { src: string; contentType: "external" }
-  | { script: string; contentType: "inline" }
-)
+} & ({ src: string; contentType: "external" } | { script: string; contentType: "inline" })
 ```
 
 **CDN and External Resources**
@@ -333,19 +338,19 @@ Following current v4 behavior with explicit control:
 ```typescript
 export interface ResourceOptions {
   // CDN settings (disabled by default, opt-in)
-  cdnCaching?: boolean               // Enable CDN for resources
-  allowedDomains?: string[]          // Allowlist for external resources
-  
+  cdnCaching?: boolean // Enable CDN for resources
+  allowedDomains?: string[] // Allowlist for external resources
+
   // Google Fonts integration (current v4 behavior)
   googleFonts?: {
     enabled: boolean
-    families: string[]               // Font families to load
+    families: string[] // Font families to load
   }
-  
+
   // Resource optimization
-  minify?: boolean                   // Minify CSS/JS
+  minify?: boolean // Minify CSS/JS
   bundling?: "inline" | "external" | "auto"
-  integrity?: boolean                // Generate SRI hashes
+  integrity?: boolean // Generate SRI hashes
 }
 ```
 
@@ -357,13 +362,13 @@ export interface ResourceOptions {
 export interface BuildGraph {
   // Build nodes represent work units
   nodes: Map<string, BuildNode>
-  
+
   // Edges represent dependencies
   edges: Map<string, Set<string>>
-  
+
   // Schedule and execute build
   schedule(): Promise<BuildResult>
-  
+
   // Incremental build support
   invalidate(paths: FilePath[]): void
   partialSchedule(): Promise<BuildResult>
@@ -391,16 +396,16 @@ export interface BuildCache {
 }
 
 export type CacheKey = {
-  contentHash: string                // Hash of input content
+  contentHash: string // Hash of input content
   pluginName: string
   pluginVersion: string
-  optionsHash: string                // Hash of plugin options
+  optionsHash: string // Hash of plugin options
 }
 
 export interface CachedEntry {
-  output: unknown                    // Cached output
+  output: unknown // Cached output
   timestamp: number
-  dependencies: string[]             // Dependency tracking
+  dependencies: string[] // Dependency tracking
 }
 ```
 
@@ -409,17 +414,17 @@ export interface CachedEntry {
 ```typescript
 // quartz.lock (JSON format)
 export interface Lockfile {
-  version: string                    // Lockfile format version
-  quartzVersion: string              // Quartz version
+  version: string // Lockfile format version
+  quartzVersion: string // Quartz version
   plugins: {
     [name: string]: {
-      version: string                // Resolved plugin version
-      resolved: string               // Resolution source (e.g., "https://registry.npmjs.org/@quartz/plugin-canvas/-/plugin-canvas-1.0.0.tgz", "git+https://github.com/user/plugin.git#abc123", or "file:./local-plugins/my-plugin")
-      integrity?: string             // Package integrity hash
+      version: string // Resolved plugin version
+      resolved: string // Resolution source (e.g., "https://registry.npmjs.org/@quartz/plugin-canvas/-/plugin-canvas-1.0.0.tgz", "git+https://github.com/user/plugin.git#abc123", or "file:./local-plugins/my-plugin")
+      integrity?: string // Package integrity hash
       dependencies?: Record<string, string>
     }
   }
-  generated: string                  // ISO timestamp
+  generated: string // ISO timestamp
 }
 ```
 
@@ -440,12 +445,12 @@ export interface LayoutDefinition {
   id: string
   name: string
   description?: string
-  layout: FullPageLayout              // Existing v4 layout structure
+  layout: FullPageLayout // Existing v4 layout structure
 }
 
 // In quartz.config.ts or quartz.layout.ts
 export const layouts: LayoutRegistry = {
-  "default": {
+  default: {
     id: "default",
     name: "Default Layout",
     layout: {
@@ -457,13 +462,15 @@ export const layouts: LayoutRegistry = {
       left: [Component.PageTitle(), Component.Explorer()],
       right: [Component.Graph(), Component.TableOfContents()],
       footer: Component.Footer(),
-    }
+    },
   },
-  "minimal": {
+  minimal: {
     id: "minimal",
     name: "Minimal Layout",
-    layout: { /* ... */ }
-  }
+    layout: {
+      /* ... */
+    },
+  },
 }
 
 // In frontmatter:
@@ -478,24 +485,24 @@ Core owns the HTML document wrapper; themes/plugins inject via slots:
 
 ```typescript
 export interface DocumentSlots {
-  htmlAttrs?: Record<string, string>  // <html> attributes
-  headStart?: JSX.Element[]           // After <head> opening
-  headEnd?: JSX.Element[]             // Before </head> closing
-  bodyAttrs?: Record<string, string>  // <body> attributes
-  bodyStart?: JSX.Element[]           // After <body> opening
-  bodyEnd?: JSX.Element[]             // Before </body> closing
+  htmlAttrs?: Record<string, string> // <html> attributes
+  headStart?: JSX.Element[] // After <head> opening
+  headEnd?: JSX.Element[] // Before </head> closing
+  bodyAttrs?: Record<string, string> // <body> attributes
+  bodyStart?: JSX.Element[] // After <body> opening
+  bodyEnd?: JSX.Element[] // Before </body> closing
 }
 
 export interface ThemePlugin {
   name: string
   version: string
-  
+
   // Inject into document slots
   injectSlots?: (ctx: BuildCtx) => Partial<DocumentSlots>
-  
+
   // Contribute resources
   externalResources?: ExternalResourcesFn
-  
+
   // Override component defaults
   overrideComponents?: Partial<Record<string, QuartzComponent>>
 }
@@ -554,10 +561,10 @@ Building on the current file watching system:
 export interface ChangeTracker {
   // Track changes since last build
   track(event: ChangeEvent): void
-  
+
   // Get affected content based on dependency graph
   getAffectedContent(changes: ChangeEvent[]): Set<PageId>
-  
+
   // Clear after successful build
   clear(): void
 }
@@ -565,10 +572,10 @@ export interface ChangeTracker {
 export interface DependencyGraph {
   // Build dependency graph from links and plugin dependencies
   build(content: ProcessedContentV5[]): void
-  
+
   // Find all content that depends on a given file
   getDependents(id: PageId): Set<PageId>
-  
+
   // Update graph incrementally
   updateNode(id: PageId, content: ProcessedContentV5): void
   removeNode(id: PageId): void
@@ -581,26 +588,29 @@ All emitters should support partial emits:
 
 ```typescript
 export interface QuartzEmitterPluginInstance extends PluginManifest {
-  emit: (ctx: BuildCtx, content: ProcessedContentV5[], resources: StaticResources) 
-    => Promise<FilePath[]> | AsyncGenerator<FilePath>
-  
+  emit: (
+    ctx: BuildCtx,
+    content: ProcessedContentV5[],
+    resources: StaticResources,
+  ) => Promise<FilePath[]> | AsyncGenerator<FilePath>
+
   // Enhanced partial emit with dependency awareness
   partialEmit?: (
     ctx: BuildCtx,
-    content: ProcessedContentV5[],        // All content
+    content: ProcessedContentV5[], // All content
     resources: StaticResources,
-    changes: ChangeInfo,                  // Enhanced change info
+    changes: ChangeInfo, // Enhanced change info
   ) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
-  
+
   getQuartzComponents?: (ctx: BuildCtx) => QuartzComponent[]
   externalResources?: ExternalResourcesFn
 }
 
 export interface ChangeInfo {
-  events: ChangeEvent[]                   // Raw change events
-  affected: Set<PageId>                   // Content IDs affected by changes
-  direct: Set<PageId>                     // Directly changed content
-  indirect: Set<PageId>                   // Indirectly affected (via dependencies)
+  events: ChangeEvent[] // Raw change events
+  affected: Set<PageId> // Content IDs affected by changes
+  direct: Set<PageId> // Directly changed content
+  indirect: Set<PageId> // Indirectly affected (via dependencies)
 }
 ```
 
@@ -609,7 +619,7 @@ export interface ChangeInfo {
 **Enhanced quartz.config.ts**
 
 ```typescript
-import { defineConfig } from './quartz/config'
+import { defineConfig } from "./quartz/config"
 
 export default defineConfig({
   configuration: {
@@ -620,14 +630,11 @@ export default defineConfig({
     baseUrl: "example.com",
     ignorePatterns: ["private/**", "drafts/**"],
     defaultDateType: "modified",
-    
+
     // New: Resource options
     resources: {
-      cdnCaching: false,               // Explicit opt-in
-      allowedDomains: [
-        "fonts.googleapis.com",
-        "fonts.gstatic.com",
-      ],
+      cdnCaching: false, // Explicit opt-in
+      allowedDomains: ["fonts.googleapis.com", "fonts.gstatic.com"],
       googleFonts: {
         enabled: true,
         families: ["Inter", "JetBrains Mono"],
@@ -635,19 +642,23 @@ export default defineConfig({
       minify: true,
       integrity: true,
     },
-    
+
     theme: {
       fontOrigin: "googleFonts",
-      typography: { /* ... */ },
-      colors: { /* ... */ },
+      typography: {
+        /* ... */
+      },
+      colors: {
+        /* ... */
+      },
     },
   },
-  
+
   plugins: {
     loaders: [
-      Plugin.MarkdownLoader(),         // Default Markdown loader
-      Plugin.CanvasLoader(),           // NEW: Obsidian Canvas support
-      Plugin.AssetLoader(),            // NEW: Asset handling
+      Plugin.MarkdownLoader(), // Default Markdown loader
+      Plugin.CanvasLoader(), // NEW: Obsidian Canvas support
+      Plugin.AssetLoader(), // NEW: Asset handling
     ],
     transformers: [
       Plugin.FrontMatter(),
@@ -660,9 +671,7 @@ export default defineConfig({
       Plugin.Description(),
       Plugin.Latex(),
     ],
-    filters: [
-      Plugin.RemoveDrafts(),
-    ],
+    filters: [Plugin.RemoveDrafts()],
     emitters: [
       Plugin.AliasRedirects(),
       Plugin.ComponentResources(),
@@ -675,7 +684,7 @@ export default defineConfig({
       Plugin.NotFoundPage(),
     ],
   },
-  
+
   // New: Layout registry
   layouts: {
     default: defaultLayout,
@@ -704,7 +713,7 @@ export const MarkdownLoader: QuartzLoaderPlugin = () => ({
   version: "5.0.0",
   apiVersion: "5.0",
   supportedExtensions: [".md", ".markdown"],
-  
+
   async load(ctx, file) {
     // Existing v4 pipeline
     const text = await file.toString()
@@ -715,7 +724,7 @@ export const MarkdownLoader: QuartzLoaderPlugin = () => ({
       slug: slugifyFilePath(file.path),
     }
   },
-  
+
   extractLinks(ctx, content) {
     // Leverage existing CrawlLinks plugin
     return extractMarkdownLinks(content.data)
@@ -731,11 +740,11 @@ export const CanvasLoader: QuartzLoaderPlugin = () => ({
   version: "5.0.0",
   apiVersion: "5.0",
   supportedExtensions: [".canvas"],
-  
+
   async load(ctx, file) {
     const json = JSON.parse(await file.toString())
     const ast = parseCanvasJSON(json)
-    
+
     return {
       kind: "canvas",
       data: ast,
@@ -745,7 +754,7 @@ export const CanvasLoader: QuartzLoaderPlugin = () => ({
       slug: slugifyFilePath(file.path),
     }
   },
-  
+
   extractLinks(ctx, content) {
     const ast = content.data as CanvasNode
     return extractCanvasLinks(ast)
@@ -761,7 +770,7 @@ export const AssetLoader: QuartzLoaderPlugin = () => ({
   version: "5.0.0",
   apiVersion: "5.0",
   supportedExtensions: [".png", ".jpg", ".jpeg", ".gif", ".svg", ".pdf", ".mp4"],
-  
+
   async load(ctx, file) {
     return {
       kind: "asset",
@@ -788,11 +797,11 @@ Provides a compatibility layer for v4 sites:
 export const LegacyPreset: QuartzPlugin = () => ({
   name: "LegacyPreset",
   version: "5.0.0",
-  
+
   // Maps v4 plugin signatures to v5
   wrapV4Plugins(plugins: PluginTypes): PluginTypes {
     return {
-      loaders: [MarkdownLoader()],     // Default loader for v4 compat
+      loaders: [MarkdownLoader()], // Default loader for v4 compat
       transformers: plugins.transformers.map(wrapV4Transformer),
       filters: plugins.filters.map(wrapV4Filter),
       emitters: plugins.emitters.map(wrapV4Emitter),
@@ -831,6 +840,7 @@ Users can migrate incrementally:
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (v5.0-alpha)
+
 - [ ] Plugin versioning and manifest system
 - [ ] Lockfile generation and management
 - [ ] Enhanced typed configuration with validation
@@ -838,6 +848,7 @@ Users can migrate incrementally:
 - [ ] Migration tooling
 
 ### Phase 2: Enhanced Build Pipeline (v5.0-beta)
+
 - [ ] Loader plugin type and registration
 - [ ] Enhanced data model (PageMeta, Links, ProcessedContentV5)
 - [ ] Content-addressed caching system
@@ -845,6 +856,7 @@ Users can migrate incrementally:
 - [ ] Enhanced dependency tracking
 
 ### Phase 3: Resource Management (v5.0-rc)
+
 - [ ] Resource registry API
 - [ ] Enhanced CSS/JS resource types
 - [ ] SRI hash generation
@@ -852,6 +864,7 @@ Users can migrate incrementally:
 - [ ] Layout registry system
 
 ### Phase 4: Multi-Format Support (v5.0)
+
 - [ ] Markdown loader (v4 compat mode)
 - [ ] Obsidian Canvas loader
 - [ ] Enhanced asset loader
@@ -859,6 +872,7 @@ Users can migrate incrementally:
 - [ ] Graph building across formats
 
 ### Phase 5: Enhanced Developer Experience (v5.1)
+
 - [ ] Plugin CLI commands (add, remove, list, search)
 - [ ] Enhanced incremental builds
 - [ ] Build cache statistics
@@ -866,6 +880,7 @@ Users can migrate incrementally:
 - [ ] Plugin development templates
 
 ### Phase 6: Advanced Features (v5.2+)
+
 - [ ] Obsidian Database support
 - [ ] Streaming emitters for large sites
 - [ ] Distributed builds
@@ -919,10 +934,17 @@ export type QuartzFilterPluginInstance = {
 
 export type QuartzEmitterPluginInstance = {
   name: string
-  emit: (ctx: BuildCtx, content: ProcessedContent[], resources: StaticResources) 
-    => Promise<FilePath[]> | AsyncGenerator<FilePath>
-  partialEmit?: (ctx: BuildCtx, content: ProcessedContent[], resources: StaticResources, 
-    changeEvents: ChangeEvent[]) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
+  emit: (
+    ctx: BuildCtx,
+    content: ProcessedContent[],
+    resources: StaticResources,
+  ) => Promise<FilePath[]> | AsyncGenerator<FilePath>
+  partialEmit?: (
+    ctx: BuildCtx,
+    content: ProcessedContent[],
+    resources: StaticResources,
+    changeEvents: ChangeEvent[],
+  ) => Promise<FilePath[]> | AsyncGenerator<FilePath> | null
   getQuartzComponents?: (ctx: BuildCtx) => QuartzComponent[]
   externalResources?: ExternalResourcesFn
 }
@@ -944,10 +966,7 @@ export type JSResource = {
   loadTime: "beforeDOMReady" | "afterDOMReady"
   moduleType?: "module"
   spaPreserve?: boolean
-} & (
-  | { src: string; contentType: "external" }
-  | { script: string; contentType: "inline" }
-)
+} & ({ src: string; contentType: "external" } | { script: string; contentType: "inline" })
 
 // From quartz/cfg.ts
 export interface QuartzConfig {
@@ -997,7 +1016,7 @@ export interface ProcessedContentV5 {
   links: Links
   assets?: EmittedAssetRef[]
   data?: Record<string, unknown>
-  vfile: VFile  // v4 compatibility
+  vfile: VFile // v4 compatibility
 }
 
 // Plugin manifest (NEW)
