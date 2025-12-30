@@ -21,6 +21,7 @@ Every plugin can now include version and capability information:
 ```
 
 **Benefits:**
+
 - Version tracking for reproducible builds
 - Capability negotiation for optimal performance
 - Dependency management between plugins
@@ -40,6 +41,7 @@ plugins: {
 ```
 
 **Supported Formats:**
+
 - Markdown (.md, .markdown)
 - Images (.png, .jpg, .gif, .svg, .webp, .avif)
 - Videos (.mp4, .webm)
@@ -56,20 +58,21 @@ Rich content representation with multiple AST formats:
 
 ```typescript
 interface ProcessedContentV5 {
-  meta: PageMeta              // Comprehensive metadata
-  frontmatter: object         // Frontmatter data
-  mdast?: MdRoot             // Markdown AST
-  hast?: HtmlRoot            // HTML AST
-  canvasAst?: CanvasNode     // Obsidian Canvas (future)
+  meta: PageMeta // Comprehensive metadata
+  frontmatter: object // Frontmatter data
+  mdast?: MdRoot // Markdown AST
+  hast?: HtmlRoot // HTML AST
+  canvasAst?: CanvasNode // Obsidian Canvas (future)
   databaseAst?: DatabaseNode // Obsidian Database (future)
-  html?: string              // Rendered HTML
-  links: Links               // Bidirectional link graph
+  html?: string // Rendered HTML
+  links: Links // Bidirectional link graph
   assets?: EmittedAssetRef[] // Associated assets
-  data?: object              // Plugin-specific data
+  data?: object // Plugin-specific data
 }
 ```
 
 **Benefits:**
+
 - Better metadata tracking (id, dates, layout, content type)
 - Bidirectional link graph (incoming/outgoing)
 - Asset tracking with SRI hashes
@@ -104,6 +107,7 @@ registry.optimize()
 ```
 
 **Features:**
+
 - Priority-based loading (critical, normal, lazy)
 - SRI hash support for security
 - Automatic deduplication
@@ -121,7 +125,7 @@ import { defineConfig } from "./quartz/cfg"
 export default defineConfig({
   configuration: {
     // ... basic config
-    
+
     // NEW: Resource management
     resources: {
       cdnCaching: false,
@@ -134,18 +138,25 @@ export default defineConfig({
       },
     },
   },
-  
-  plugins: { /* ... */ },
-  
+
+  plugins: {
+    /* ... */
+  },
+
   // NEW: Layout registry
   layouts: {
-    default: { /* ... */ },
-    minimal: { /* ... */ },
+    default: {
+      /* ... */
+    },
+    minimal: {
+      /* ... */
+    },
   },
 })
 ```
 
 **Features:**
+
 - Runtime validation with helpful error messages
 - Type safety for all configuration options
 - Resource management options
@@ -180,6 +191,7 @@ layout: blog
 ```
 
 **Benefits:**
+
 - Reusable layout definitions
 - Type-safe layout configuration
 - Easy layout switching per page
@@ -199,6 +211,7 @@ interface BuildCache {
 ```
 
 **Features:**
+
 - Content-based cache keys
 - Plugin version-aware caching
 - Dependency tracking
@@ -206,6 +219,7 @@ interface BuildCache {
 - Memory and file-based backends
 
 **Performance:**
+
 - Up to 10x faster for incremental builds
 - Smart invalidation based on changes
 - Efficient memory usage
@@ -226,6 +240,7 @@ const dependencies = graph.getDependencies(pageId)
 ```
 
 **Features:**
+
 - Bidirectional dependency tracking
 - Incremental graph updates
 - Efficient affected content calculation
@@ -251,6 +266,7 @@ Reproducible builds with version locking:
 ```
 
 **Benefits:**
+
 - Consistent builds across environments
 - Plugin version tracking
 - Integrity verification

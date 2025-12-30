@@ -20,10 +20,10 @@ import { PluginManifest } from "./quartz/plugins/manifest"
 
 export interface MyPluginInstance extends PluginManifest {
   name: string
-  version: string      // semver (e.g., "1.2.3")
-  apiVersion: string   // Quartz API version (e.g., "5.0" or "^5.0")
-  capabilities?: string[]        // Optional: ["incremental", "streaming"]
-  dependencies?: Record<string, string>  // Plugin dependencies
+  version: string // semver (e.g., "1.2.3")
+  apiVersion: string // Quartz API version (e.g., "5.0" or "^5.0")
+  capabilities?: string[] // Optional: ["incremental", "streaming"]
+  dependencies?: Record<string, string> // Plugin dependencies
 }
 ```
 
@@ -41,13 +41,13 @@ export const MyLoader: QuartzLoaderPlugin = () => ({
   version: "1.0.0",
   apiVersion: "5.0",
   supportedExtensions: [".myformat"],
-  
+
   async load(ctx: BuildCtx, file: VFile): Promise<LoadedContent> {
     const content = file.value.toString()
-    
+
     // Parse your custom format
     const parsed = parseMyFormat(content)
-    
+
     return {
       kind: "custom",
       data: parsed,
@@ -55,11 +55,11 @@ export const MyLoader: QuartzLoaderPlugin = () => ({
       slug: slugifyFilePath(file.path),
     }
   },
-  
+
   // Optional: extract links for graph building
   extractLinks(ctx: BuildCtx, content: LoadedContent) {
     const data = content.data as MyFormatData
-    return data.links.map(link => ({
+    return data.links.map((link) => ({
       target: link.href,
       type: "custom",
       text: link.text,
@@ -69,7 +69,9 @@ export const MyLoader: QuartzLoaderPlugin = () => ({
 
 function parseMyFormat(content: string): MyFormatData {
   // Your parsing logic
-  return { /* ... */ }
+  return {
+    /* ... */
+  }
 }
 ```
 
@@ -93,12 +95,12 @@ export const MyTransformer: QuartzTransformerPlugin = () => ({
   name: "MyTransformer",
   version: "1.0.0",
   apiVersion: "5.0",
-  
+
   // Optional: text-level transformation
   textTransform(ctx: BuildCtx, src: string): string {
     return src.replace(/foo/g, "bar")
   },
-  
+
   // Optional: Markdown AST transformation
   markdownPlugins(ctx: BuildCtx) {
     return [
@@ -106,7 +108,7 @@ export const MyTransformer: QuartzTransformerPlugin = () => ({
       [remarkPlugin, { option: "value" }],
     ]
   },
-  
+
   // Optional: HTML AST transformation
   htmlPlugins(ctx: BuildCtx) {
     return [
@@ -114,16 +116,18 @@ export const MyTransformer: QuartzTransformerPlugin = () => ({
       [rehypePlugin, { option: "value" }],
     ]
   },
-  
+
   // Optional: contribute resources
   externalResources(ctx: BuildCtx) {
     return {
       css: ["https://example.com/style.css"],
-      js: [{
-        src: "https://example.com/script.js",
-        loadTime: "afterDOMReady",
-        contentType: "external",
-      }],
+      js: [
+        {
+          src: "https://example.com/script.js",
+          loadTime: "afterDOMReady",
+          contentType: "external",
+        },
+      ],
     }
   },
 })
@@ -148,16 +152,16 @@ export const MyFilter: QuartzFilterPlugin<{ includeTags?: string[] }> = (opts) =
   name: "MyFilter",
   version: "1.0.0",
   apiVersion: "5.0",
-  
+
   shouldPublish(ctx, content) {
     const frontmatter = content[1].data.frontmatter
-    
+
     // Example: filter by tags
     if (opts?.includeTags) {
       const tags = frontmatter?.tags || []
-      return opts.includeTags.some(tag => tags.includes(tag))
+      return opts.includeTags.some((tag) => tags.includes(tag))
     }
-    
+
     return true
   },
 })
@@ -182,43 +186,41 @@ export const MyEmitter: QuartzEmitterPlugin = () => ({
   name: "MyEmitter",
   version: "1.0.0",
   apiVersion: "5.0",
-  
+
   async emit(ctx, content, resources) {
     const filePaths: FilePath[] = []
-    
+
     // Generate files
     for (const item of content) {
       const [tree, vfile] = item
       const slug = vfile.data.slug
-      
+
       // Create output
       const output = generateOutput(tree, vfile, resources)
-      
+
       // Write file
       const outputPath = await ctx.write({
         slug,
         ext: ".html",
         content: output,
       })
-      
+
       filePaths.push(outputPath)
     }
-    
+
     return filePaths
   },
-  
+
   // Optional: partial emit for incremental builds
   partialEmit(ctx, content, resources, changeEvents) {
     // Only emit changed files
-    const changed = new Set(changeEvents.map(e => e.path))
-    const changedContent = content.filter(([_, vfile]) => 
-      changed.has(vfile.path)
-    )
-    
+    const changed = new Set(changeEvents.map((e) => e.path))
+    const changedContent = content.filter(([_, vfile]) => changed.has(vfile.path))
+
     if (changedContent.length === 0) {
-      return null  // Nothing to emit
+      return null // Nothing to emit
     }
-    
+
     return this.emit(ctx, changedContent, resources)
   },
 })
@@ -247,7 +249,7 @@ export const MyPlugin: QuartzTransformerPlugin<MyPluginOptions> = (opts) => {
   // Access options with type safety
   const enabled = opts?.enabled ?? true
   const threshold = opts?.threshold ?? 10
-  
+
   return {
     name: "MyPlugin",
     version: "1.0.0",
@@ -267,8 +269,8 @@ export const MyPlugin: QuartzTransformerPlugin = () => ({
   version: "1.0.0",
   apiVersion: "5.0",
   dependencies: {
-    "FrontMatter": "^1.0.0",  // Requires FrontMatter plugin
-    "CrawlLinks": "^1.0.0",   // Requires CrawlLinks plugin
+    FrontMatter: "^1.0.0", // Requires FrontMatter plugin
+    CrawlLinks: "^1.0.0", // Requires CrawlLinks plugin
   },
   // ... implementation
 })
@@ -284,8 +286,8 @@ export const MyPlugin: QuartzTransformerPlugin = () => ({
   version: "1.0.0",
   apiVersion: "5.0",
   capabilities: [
-    "incremental",  // Supports incremental builds
-    "streaming",    // Supports streaming output
+    "incremental", // Supports incremental builds
+    "streaming", // Supports streaming output
   ],
   // ... implementation
 })
@@ -304,7 +306,7 @@ describe("MyPlugin", () => {
   it("should transform content correctly", () => {
     const plugin = MyPlugin()
     const ctx = createMockContext()
-    
+
     const result = plugin.textTransform(ctx, "input")
     assert.strictEqual(result, "expected output")
   })

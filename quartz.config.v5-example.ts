@@ -1,6 +1,6 @@
 /**
  * Example Quartz v5 Configuration
- * 
+ *
  * This file demonstrates the new v5 features while maintaining
  * backward compatibility with v4 configurations.
  */
@@ -25,23 +25,20 @@ const v5Config = defineConfig({
     baseUrl: "example.com",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
-    
+
     // v5: Enhanced resource management
     resources: {
-      cdnCaching: false,              // Explicit opt-in for CDN
-      allowedDomains: [
-        "fonts.googleapis.com",
-        "fonts.gstatic.com",
-      ],
+      cdnCaching: false, // Explicit opt-in for CDN
+      allowedDomains: ["fonts.googleapis.com", "fonts.gstatic.com"],
       googleFonts: {
         enabled: true,
         families: ["Inter", "JetBrains Mono"],
       },
-      minify: true,                   // Minify CSS/JS
-      bundling: "auto",               // Auto-detect bundling strategy
-      integrity: true,                // Generate SRI hashes
+      minify: true, // Minify CSS/JS
+      bundling: "auto", // Auto-detect bundling strategy
+      integrity: true, // Generate SRI hashes
     },
-    
+
     theme: {
       fontOrigin: "googleFonts",
       cdnCaching: true,
@@ -76,14 +73,14 @@ const v5Config = defineConfig({
       },
     },
   },
-  
+
   plugins: {
     // v5: Loaders for multi-format support
     loaders: [
-      Plugin.Loaders.MarkdownLoader(),   // Default Markdown loader
-      Plugin.Loaders.AssetLoader(),       // Asset loader (images, PDFs, etc.)
+      Plugin.Loaders.MarkdownLoader(), // Default Markdown loader
+      Plugin.Loaders.AssetLoader(), // Asset loader (images, PDFs, etc.)
     ],
-    
+
     transformers: [
       Plugin.FrontMatter(),
       Plugin.CreatedModifiedDate({
@@ -103,11 +100,9 @@ const v5Config = defineConfig({
       Plugin.Description(),
       Plugin.Latex({ renderEngine: "katex" }),
     ],
-    
-    filters: [
-      Plugin.RemoveDrafts(),
-    ],
-    
+
+    filters: [Plugin.RemoveDrafts()],
+
     emitters: [
       Plugin.AliasRedirects(),
       Plugin.ComponentResources(),
@@ -123,7 +118,7 @@ const v5Config = defineConfig({
       Plugin.NotFoundPage(),
     ],
   },
-  
+
   // v5: Layout registry - pre-define layouts that can be selected in frontmatter
   layouts: {
     default: {
@@ -156,7 +151,7 @@ const v5Config = defineConfig({
         }),
       },
     },
-    
+
     minimal: {
       id: "minimal",
       name: "Minimal Layout",

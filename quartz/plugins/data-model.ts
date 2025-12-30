@@ -1,6 +1,6 @@
 /**
  * Quartz v5 Enhanced Data Model
- * 
+ *
  * Extended content model with better metadata, links, and asset tracking
  */
 
@@ -26,37 +26,37 @@ export type LinkType = "wiki" | "markdown" | "url" | "embed" | "canvas" | "custo
 export interface PageMeta {
   /** Unique content-addressable ID */
   id: PageId
-  
+
   /** URL slug */
   slug: FullSlug
-  
+
   /** Source-relative path */
   filePath: FilePath
-  
+
   /** Output-relative path (e.g., foo/index.html) */
   outPath: string
-  
+
   /** Page title */
   title?: string
-  
+
   /** Tags */
   tags: string[]
-  
+
   /** Creation date */
   created?: Date
-  
+
   /** Last modified date */
   updated?: Date
-  
+
   /** Draft status */
   draft?: boolean
-  
+
   /** Publish status */
   publish?: boolean
-  
+
   /** Content type */
   contentKind: ContentKind
-  
+
   /** Selected layout ID */
   layoutId?: string
 }
@@ -72,7 +72,7 @@ export interface Links {
     text?: string
     meta?: unknown
   }>
-  
+
   /** Incoming links to this page */
   incoming: Array<{
     source: PageId | FullSlug
@@ -93,19 +93,19 @@ export type AssetType = "css" | "js" | "font" | "image" | "wasm" | "other"
 export interface EmittedAssetRef {
   /** Unique asset ID */
   id: string
-  
+
   /** Output-relative path */
   relPath: string
-  
+
   /** Asset type */
   type: AssetType
-  
+
   /** SRI hash for security */
   integrity?: string
-  
+
   /** File size in bytes */
   size?: number
-  
+
   /** Content hash for cache busting */
   hash?: string
 }
@@ -137,34 +137,34 @@ export interface DatabaseNode {
 export interface ProcessedContentV5 {
   /** Enhanced metadata */
   meta: PageMeta
-  
+
   /** Frontmatter data */
   frontmatter: Record<string, unknown>
-  
+
   /** Markdown AST (for markdown content) */
   mdast?: MdRoot
-  
+
   /** HTML AST (for markdown content) */
   hast?: HtmlRoot
-  
+
   /** Canvas AST (for canvas content) */
   canvasAst?: CanvasNode
-  
+
   /** Database AST (for database content) */
   databaseAst?: DatabaseNode
-  
+
   /** Rendered HTML (content slot) */
   html?: string
-  
+
   /** Link graph */
   links: Links
-  
+
   /** Associated assets */
   assets?: EmittedAssetRef[]
-  
+
   /** Plugin-specific data storage */
   data?: Record<string, unknown>
-  
+
   /** v4 compatibility: original vfile */
   vfile: VFile
 }

@@ -1,6 +1,6 @@
 /**
  * Quartz v5 Loaders
- * 
+ *
  * Built-in loader plugins for different content formats
  */
 
@@ -19,11 +19,11 @@ export const MarkdownLoader: QuartzLoaderPlugin = () => {
     version: "5.0.0",
     apiVersion: "5.0",
     supportedExtensions: [".md", ".markdown"],
-    
+
     async load(ctx: BuildCtx, file: VFile): Promise<LoadedContent> {
       // Convert VFile content to string
       const text = file.value.toString()
-      
+
       return {
         kind: "markdown",
         data: text,
@@ -31,7 +31,7 @@ export const MarkdownLoader: QuartzLoaderPlugin = () => {
       }
     },
   }
-  
+
   return instance
 }
 
@@ -44,15 +44,25 @@ export const AssetLoader: QuartzLoaderPlugin = () => {
     version: "5.0.0",
     apiVersion: "5.0",
     supportedExtensions: [
-      ".png", ".jpg", ".jpeg", ".gif", ".svg", 
-      ".pdf", ".mp4", ".webm", ".mp3", ".wav",
-      ".webp", ".avif", ".ico"
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".svg",
+      ".pdf",
+      ".mp4",
+      ".webm",
+      ".mp3",
+      ".wav",
+      ".webp",
+      ".avif",
+      ".ico",
     ],
-    
+
     async load(ctx: BuildCtx, file: VFile): Promise<LoadedContent> {
       const path = file.path
       const ext = path.substring(path.lastIndexOf("."))
-      
+
       // Determine MIME type based on extension
       const mimeTypes: Record<string, string> = {
         ".png": "image/png",
@@ -69,7 +79,7 @@ export const AssetLoader: QuartzLoaderPlugin = () => {
         ".mp3": "audio/mpeg",
         ".wav": "audio/wav",
       }
-      
+
       return {
         kind: "asset",
         data: {
@@ -80,6 +90,6 @@ export const AssetLoader: QuartzLoaderPlugin = () => {
       }
     },
   }
-  
+
   return instance
 }

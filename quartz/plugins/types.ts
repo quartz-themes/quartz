@@ -12,7 +12,7 @@ export interface PluginTypes {
   transformers: QuartzTransformerPluginInstance[]
   filters: QuartzFilterPluginInstance[]
   emitters: QuartzEmitterPluginInstance[]
-  loaders?: QuartzLoaderPluginInstance[]  // v5: optional for backward compatibility
+  loaders?: QuartzLoaderPluginInstance[] // v5: optional for backward compatibility
 }
 
 type OptionType = object | undefined
@@ -28,7 +28,7 @@ export type QuartzTransformerPluginInstance = {
   markdownPlugins?: (ctx: BuildCtx) => PluggableList
   htmlPlugins?: (ctx: BuildCtx) => PluggableList
   externalResources?: ExternalResourcesFn
-} & Partial<PluginManifest>  // v5: optional manifest fields
+} & Partial<PluginManifest> // v5: optional manifest fields
 
 export type QuartzFilterPlugin<Options extends OptionType = undefined> = (
   opts?: Options,
@@ -38,7 +38,7 @@ export type QuartzFilterPlugin<Options extends OptionType = undefined> = (
 export type QuartzFilterPluginInstance = {
   name: string
   shouldPublish(ctx: BuildCtx, content: ProcessedContent): boolean
-} & Partial<PluginManifest>  // v5: optional manifest fields
+} & Partial<PluginManifest> // v5: optional manifest fields
 
 export type ChangeEvent = {
   type: "add" | "change" | "delete"
@@ -71,4 +71,4 @@ export type QuartzEmitterPluginInstance = {
    */
   getQuartzComponents?: (ctx: BuildCtx) => QuartzComponent[]
   externalResources?: ExternalResourcesFn
-} & Partial<PluginManifest>  // v5: optional manifest fields
+} & Partial<PluginManifest> // v5: optional manifest fields

@@ -1,16 +1,11 @@
 /**
  * Quartz v5 Lockfile Generator
- * 
+ *
  * Generates lockfiles from current plugin configuration
  */
 
 import { QuartzConfig } from "../cfg"
-import { 
-  Lockfile, 
-  createLockfile, 
-  addPluginToLockfile, 
-  serializeLockfile 
-} from "./lockfile"
+import { Lockfile, createLockfile, addPluginToLockfile, serializeLockfile } from "./lockfile"
 import { PluginManifest } from "../plugins/manifest"
 import { readFileSync } from "fs"
 import path from "path"
@@ -35,7 +30,7 @@ function getQuartzVersion(): string {
 export function generateLockfileFromConfig(config: QuartzConfig): Lockfile {
   const quartzVersion = getQuartzVersion()
   const lockfile = createLockfile(quartzVersion)
-  
+
   // Process all plugin types
   const allPlugins = [
     ...(config.plugins.loaders || []),
@@ -43,26 +38,26 @@ export function generateLockfileFromConfig(config: QuartzConfig): Lockfile {
     ...config.plugins.filters,
     ...config.plugins.emitters,
   ]
-  
+
   for (const plugin of allPlugins) {
     // Check if plugin has manifest information
     const manifest = plugin as Partial<PluginManifest>
-    
+
     if (manifest.name) {
       const version = manifest.version || "1.0.0"
       const resolved = `builtin:${manifest.name}@${version}`
-      
+
       addPluginToLockfile(
         lockfile,
         manifest.name,
         version,
         resolved,
         undefined,
-        manifest.dependencies
+        manifest.dependencies,
       )
     }
   }
-  
+
   return lockfile
 }
 

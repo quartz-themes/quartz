@@ -1,6 +1,6 @@
 /**
  * Quartz v5 Build Cache System
- * 
+ *
  * Content-addressed caching for faster incremental builds
  */
 
@@ -12,13 +12,13 @@ import { createHash } from "crypto"
 export interface CacheKey {
   /** Hash of input content */
   contentHash: string
-  
+
   /** Plugin name */
   pluginName: string
-  
+
   /** Plugin version */
   pluginVersion: string
-  
+
   /** Hash of plugin options */
   optionsHash: string
 }
@@ -29,10 +29,10 @@ export interface CacheKey {
 export interface CachedEntry {
   /** Cached output data */
   output: unknown
-  
+
   /** Timestamp when cached */
   timestamp: number
-  
+
   /** Dependencies for invalidation */
   dependencies: string[]
 }
@@ -43,16 +43,16 @@ export interface CachedEntry {
 export interface BuildCache {
   /** Get cached entry by key */
   get(key: CacheKey): Promise<CachedEntry | undefined>
-  
+
   /** Set cached entry */
   set(key: CacheKey, value: CachedEntry): Promise<void>
-  
+
   /** Invalidate specific cache entry */
   invalidate(key: CacheKey): Promise<void>
-  
+
   /** Clear entire cache */
   clear(): Promise<void>
-  
+
   /** Get cache statistics */
   stats(): Promise<CacheStats>
 }
@@ -63,13 +63,13 @@ export interface BuildCache {
 export interface CacheStats {
   /** Total number of entries */
   entries: number
-  
+
   /** Total cache size in bytes */
   size: number
-  
+
   /** Number of cache hits */
   hits: number
-  
+
   /** Number of cache misses */
   misses: number
 }
@@ -103,37 +103,37 @@ export function createMemoryCache(): BuildCache {
   const cache = new Map<string, CachedEntry>()
   let hits = 0
   let misses = 0
-  
+
   return {
     async get(key: CacheKey) {
       const cacheKey = serializeCacheKey(key)
       const entry = cache.get(cacheKey)
-      
+
       if (entry) {
         hits++
         return entry
       }
-      
+
       misses++
       return undefined
     },
-    
+
     async set(key: CacheKey, value: CachedEntry) {
       const cacheKey = serializeCacheKey(key)
       cache.set(cacheKey, value)
     },
-    
+
     async invalidate(key: CacheKey) {
       const cacheKey = serializeCacheKey(key)
       cache.delete(cacheKey)
     },
-    
+
     async clear() {
       cache.clear()
       hits = 0
       misses = 0
     },
-    
+
     async stats() {
       // Calculate total cache size
       let totalSize = 0
@@ -141,7 +141,7 @@ export function createMemoryCache(): BuildCache {
         const entryStr = JSON.stringify(entry)
         totalSize += entryStr.length
       }
-      
+
       return {
         entries: cache.size,
         size: totalSize,

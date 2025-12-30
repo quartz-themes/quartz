@@ -43,12 +43,18 @@ export default defineConfig({
   plugins: {
     // NEW: Loaders (optional, defaults to Markdown)
     loaders: [
-      Plugin.Loaders.MarkdownLoader(),  // Markdown support (default)
-      Plugin.Loaders.AssetLoader(),      // Images, PDFs, etc.
+      Plugin.Loaders.MarkdownLoader(), // Markdown support (default)
+      Plugin.Loaders.AssetLoader(), // Images, PDFs, etc.
     ],
-    transformers: [/* ... */],
-    filters: [/* ... */],
-    emitters: [/* ... */],
+    transformers: [
+      /* ... */
+    ],
+    filters: [
+      /* ... */
+    ],
+    emitters: [
+      /* ... */
+    ],
   },
 })
 ```
@@ -61,7 +67,9 @@ The new `defineConfig` helper provides validation and type checking:
 import { defineConfig } from "./quartz/cfg"
 
 // v4 style (still works)
-const config: QuartzConfig = { /* ... */ }
+const config: QuartzConfig = {
+  /* ... */
+}
 
 // v5 style (recommended)
 const config = defineConfig({
@@ -84,13 +92,13 @@ Fine-tune how resources are handled:
 export default defineConfig({
   configuration: {
     // ... existing config
-    
+
     // NEW: Resource options
     resources: {
-      cdnCaching: false,        // Opt-in for CDN
-      minify: true,             // Minify CSS/JS
-      bundling: "auto",         // Bundling strategy
-      integrity: true,          // Generate SRI hashes
+      cdnCaching: false, // Opt-in for CDN
+      minify: true, // Minify CSS/JS
+      bundling: "auto", // Bundling strategy
+      integrity: true, // Generate SRI hashes
       googleFonts: {
         enabled: true,
         families: ["Inter", "Source Sans Pro"],
@@ -109,7 +117,7 @@ import * as Component from "./quartz/components"
 
 export default defineConfig({
   // ... configuration and plugins
-  
+
   // NEW: Layout registry
   layouts: {
     default: {
@@ -223,16 +231,20 @@ If you're developing custom plugins, consider adding v5 manifest information:
 // v4 plugin
 export const MyPlugin: QuartzTransformerPlugin = () => ({
   name: "MyPlugin",
-  markdownPlugins() { /* ... */ },
+  markdownPlugins() {
+    /* ... */
+  },
 })
 
 // v5 plugin (backward compatible)
 export const MyPlugin: QuartzTransformerPlugin = () => ({
   name: "MyPlugin",
-  version: "1.0.0",        // NEW
-  apiVersion: "5.0",       // NEW
-  capabilities: [],        // NEW (optional)
-  markdownPlugins() { /* ... */ },
+  version: "1.0.0", // NEW
+  apiVersion: "5.0", // NEW
+  capabilities: [], // NEW (optional)
+  markdownPlugins() {
+    /* ... */
+  },
 })
 ```
 
@@ -276,7 +288,9 @@ If you reference a layout in frontmatter that doesn't exist in the registry, the
 
 ```typescript
 layouts: {
-  myLayout: { /* ... */ }
+  myLayout: {
+    /* ... */
+  }
 }
 ```
 
