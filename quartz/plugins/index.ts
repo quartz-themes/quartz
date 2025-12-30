@@ -45,6 +45,11 @@ export function getStaticResourcesFromPlugins(ctx: BuildCtx) {
 export * from "./transformers"
 export * from "./filters"
 export * from "./emitters"
+export * as Loaders from "./loaders"  // v5: Export loaders
+
+// v5: Export manifest and loader types
+export * from "./manifest"
+export * from "./loader"
 
 declare module "vfile" {
   // inserted in processors.ts

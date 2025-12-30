@@ -103,3 +103,32 @@ export interface FullPageLayout {
 
 export type PageLayout = Pick<FullPageLayout, "beforeBody" | "left" | "right">
 export type SharedLayout = Pick<FullPageLayout, "head" | "header" | "footer" | "afterBody">
+
+/**
+ * v5: Helper function to define Quartz configuration with type checking and validation
+ * 
+ * @param config - The Quartz configuration object
+ * @returns The same configuration object, validated
+ */
+export function defineConfig(config: QuartzConfig): QuartzConfig {
+  // Basic validation
+  if (!config.configuration) {
+    throw new Error("Configuration object is required")
+  }
+  
+  if (!config.plugins) {
+    throw new Error("Plugins configuration is required")
+  }
+  
+  // Validate required fields
+  if (!config.configuration.pageTitle) {
+    throw new Error("pageTitle is required in configuration")
+  }
+  
+  // Set defaults for optional loaders (v5 backward compatibility)
+  if (!config.plugins.loaders) {
+    config.plugins.loaders = []
+  }
+  
+  return config
+}
