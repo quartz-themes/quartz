@@ -118,7 +118,21 @@ export interface ResourceOptions {
 export interface QuartzConfig {
   configuration: GlobalConfiguration
   plugins: PluginTypes
+  
+  /** v5: Optional layout registry for pre-defined layouts */
+  layouts?: Record<string, LayoutDefinition>
 }
+
+/**
+ * v5: Layout definition (re-exported from layout-registry for convenience)
+ */
+export interface LayoutDefinition {
+  id: string
+  name: string
+  description?: string
+  layout: FullPageLayout
+}
+
 
 export interface FullPageLayout {
   head: QuartzComponent
@@ -155,9 +169,76 @@ export function defineConfig(config: QuartzConfig): QuartzConfig {
     throw new Error("pageTitle is required in configuration")
   }
   
+  if (typeof config.configuration.enableSPA !== 'boolean') {
+    throw new Error("enableSPA must be a boolean")
+  }
+  
+  if (typeof config.configuration.enablePopovers !== 'boolean') {
+    throw new Error("enablePopovers must be a boolean")
+  }
+  
+  // Validate plugin arrays
+  if (!Array.isArray(config.plugins.transformers)) {
+    throw new Error("plugins.transformers must be an array")
+  }
+  
+  if (!Array.isArray(config.plugins.filters)) {
+    throw new Error("plugins.filters must be an array")
+  }
+  
+  if (!Array.isArray(config.plugins.emitters)) {
+    throw new Error("plugins.emitters must be an array")
+  }
+  
   // Set defaults for optional loaders (v5 backward compatibility)
   if (!config.plugins.loaders) {
     config.plugins.loaders = []
+  }
+  
+  // Validate loaders if provided
+  if (config.plugins.loaders && !Array.isArray(config.plugins.loaders)) {
+    throw new Error("plugins.loaders must be an array")
+  }
+  
+  // Validate layout registry if provided
+  if (config.layouts) {
+    for (const [id, layout] of Object.entries(config.layouts)) {
+      if (!layout.id || layout.id !== id) {
+        console.warn(`Layout "${id}" has mismatched ID, fixing...`)
+        layout.id = id
+      }
+      
+      if (!layout.name) {
+        throw new Error(`Layout "${id}" must have a name`)
+      }
+      
+      if (!layout.layout) {
+        throw new Error(`Layout "${id}" must have a layout configuration`)
+      }
+    }
+  }
+  
+  // Validate resource options if provided
+  if (config.configuration.resources) {
+    const resources = config.configuration.resources
+    
+    if (resources.bundling && !['inline', 'external', 'auto'].includes(resources.bundling)) {
+      throw new Error("resources.bundling must be 'inline', 'external', or 'auto'")
+    }
+    
+    if (resources.allowedDomains && !Array.isArray(resources.allowedDomains)) {
+      throw new Error("resources.allowedDomains must be an array of strings")
+    }
+    
+    if (resources.googleFonts) {
+      if (typeof resources.googleFonts.enabled !== 'boolean') {
+        throw new Error("resources.googleFonts.enabled must be a boolean")
+      }
+      
+      if (resources.googleFonts.families && !Array.isArray(resources.googleFonts.families)) {
+        throw new Error("resources.googleFonts.families must be an array of strings")
+      }
+    }
   }
   
   return config
